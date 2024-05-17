@@ -1,0 +1,11 @@
+streamlit
+streamlit_antd_components
+pandas
+seaborn
+matplotlib
+scikit-learn
+streamlit_pdf_viewer
+scipy
+numpy
+joblib
+statsmodels
