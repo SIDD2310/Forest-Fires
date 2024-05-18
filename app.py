@@ -188,7 +188,7 @@ def self_explore():
 
 
 def questions():
-    st.write("<div style='text-align: center'><h1>Managerial questions and Answers</h1></div>",
+    st.write("<div style='text-align: center'><h1>Managerial Questions and Answers</h1></div>",
              unsafe_allow_html=True)
 
     st.header('Questions (Click to redirect to the answer)')
@@ -282,21 +282,21 @@ def questions():
 
     con2 = ''' ### Day of the Week Analysis
 
-    ### Hypothesis
-    
-    There is a difference in the number of fires on different days of the week.
+#### Hypothesis
 
-    We will use a one-way ANOVA test to compare the mean number of fires across different days of the week. If the p-value is significant, we will perform post-hoc tests (e.g., Tukey's HSD) to identify which days significantly differ from each other.
+There is a difference in the number of fires on different days of the week.
 
-    ## Time of Day Analysis
+We will use a one-way ANOVA test to compare the mean number of fires across different days of the week. If the p-value is significant, we will perform post-hoc tests (e.g., Tukey's HSD) to identify which days significantly differ from each other.
 
-    ### Hypothesis
-    
-    There is a difference in the number of fires during different times of the day.
+### Time of Day Analysis
 
-    Since there's no 'hour' column in the dataset, we'll create time intervals (e.g., morning, afternoon, evening) based on the 'temp' column.
+#### Hypothesis
 
-    We'll group the data into time intervals and then perform a similar one-way ANOVA test as in the day of the week analysis.
+There is a difference in the number of fires during different times of the day.
+
+Since there's no 'hour' column in the dataset, we'll create time intervals (e.g., morning, afternoon, evening) based on the 'temp' column.
+
+We'll group the data into time intervals and then perform a similar one-way ANOVA test as in the day of the week analysis.
     '''
     st.markdown(con2)
 
@@ -341,29 +341,29 @@ def questions():
     st.write("F-statistic:", f_statistic_time)
     st.write("p-value:", p_value_time)
 
-    con3 = ''' ## Day of the Week Analysis
+    con3 = ''' ### Day of the Week Analysis
 
-    **F-statistic :** 0.859  
-    **p-value:** 0.525
+**F-statistic:** 0.859  
+**p-value:** 0.525
 
-    The p-value of 0.525 is not significant (p > 0.05), indicating that there is no significant difference in the number of fires across different days of the week.
+The p-value of 0.525 is not significant (p > 0.05), indicating that there is no significant difference in the number of fires across different days of the week.
 
-    ## Time of Day Analysis
+### Time of Day Analysis
 
-    **F-statistic:** 1.730  
-    **p-value:** 0.178
+**F-statistic:** 1.730  
+**p-value:** 0.178
 
-    Similarly, the p-value of 0.178 is also not significant (p > 0.05), suggesting that there is no significant difference in the number of fires during different times of the day.
+Similarly, the p-value of 0.178 is also not significant (p > 0.05), suggesting that there is no significant difference in the number of fires during different times of the day.
 
-    ## Actionable Insights
+## Actionable Insights
 
-    ### Day of the Week:
-    Since there is no significant difference in fire incidence across days of the week, resources can be allocated evenly throughout the week for fire prevention and control measures.
+### Day of the Week:
+Since there is no significant difference in fire incidence across days of the week, resources can be allocated evenly throughout the week for fire prevention and control measures.
 
-    ### Time of Day:
-    The lack of significant difference in fire incidence across time intervals suggests that fire risk may not be strongly associated with specific times of the day in this dataset. However, it's still crucial to maintain vigilance and readiness for fire incidents at all times.
+### Time of Day:
+The lack of significant difference in fire incidence across time intervals suggests that fire risk may not be strongly associated with specific times of the day in this dataset. However, it's still crucial to maintain vigilance and readiness for fire incidents at all times.
 
-    These insights can guide fire management strategies and resource allocation, focusing on overall preparedness rather than specific days or times.
+These insights can guide fire management strategies and resource allocation, focusing on overall preparedness rather than specific days or times.
     '''
     st.markdown(con3)
 
@@ -373,18 +373,18 @@ def questions():
 
     con4 = ''' ## Research Questions
 
-    1. **Does weather condition (temperature, humidity, wind speed, and rainfall) significantly affect forest fire occurrence?**
-    2. **Is there a relationship between moisture content (Fine Fuel Moisture Code - FFMC, Duff Moisture Code - DMC, Drought Code - DC) and forest fire intensity?**
-    3. **Do forest fires vary significantly across different months and days of the week?**
+1. **Does weather condition (temperature, humidity, wind speed, and rainfall) significantly affect forest fire occurrence?**
+2. **Is there a relationship between moisture content (Fine Fuel Moisture Code - FFMC, Duff Moisture Code - DMC, Drought Code - DC) and forest fire intensity?**
+3. **Do forest fires vary significantly across different months and days of the week?**
 
-    ## Analysis
+## Analysis
 
-    ### 1. Weather Condition Analysis
+### 1. Weather Condition Analysis
 
-    **Hypothesis:** Weather conditions significantly affect forest fire occurrence.  
-    **Statistical Analysis:** Multiple Linear Regression  
-    **Result Interpretation:** Determine coefficients of weather variables and their significance.  
-    **Actionable Insights:** Identify which weather variables have the most impact on forest fire occurrence.
+**Hypothesis:** Weather conditions significantly affect forest fire occurrence.  
+**Statistical Analysis:** Multiple Linear Regression  
+**Result Interpretation:** Determine coefficients of weather variables and their significance.  
+**Actionable Insights:** Identify which weather variables have the most impact on forest fire occurrence.
     '''
     st.markdown(con4)
 
@@ -521,15 +521,15 @@ def questions():
     st.write('')
     st.write('')
     st.header('5. Is there a seasonal trend in fire risk? ')
-    con9 = '''# Formulate Research Questions
+    con9 = '''### Formulate Research Questions
 
 1. **Is there a significant difference in fire risk between different seasons?**
 2. **How does temperature and relative humidity vary across different months?**
 3. **Is there a significant correlation between fire risk indices (FFMC, DMC, DC, ISI) and seasonal variations?**
 
-# Define Hypotheses for Statistical Analysis
+### Define Hypotheses for Statistical Analysis
 
-## Research Question 1: Is there a significant difference in fire risk between different seasons?
+#### Research Question 1: Is there a significant difference in fire risk between different seasons?
 
 **Hypothesis:**
 - **Null Hypothesis (H0):** There is no significant difference in fire risk (measured by area burned) between different seasons.
@@ -537,7 +537,7 @@ def questions():
 
 **Statistical Test:** One-way ANOVA (Analysis of Variance)
 
-## Research Question 2: How does temperature and relative humidity vary across different months?
+#### Research Question 2: How does temperature and relative humidity vary across different months?
 
 **Hypothesis:**
 - **Null Hypothesis (H0):** There is no significant difference in temperature and relative humidity between different months.
@@ -545,7 +545,7 @@ def questions():
 
 **Statistical Test:** One-way ANOVA for temperature and relative humidity
 
-## Research Question 3: Is there a significant correlation between fire risk indices (FFMC, DMC, DC, ISI) and seasonal variations?
+#### Research Question 3: Is there a significant correlation between fire risk indices (FFMC, DMC, DC, ISI) and seasonal variations?
 
 **Hypothesis:**
 - **Null Hypothesis (H0):** There is no significant correlation between fire risk indices and seasonal variations.
@@ -553,7 +553,7 @@ def questions():
 
 **Statistical Test:** Pearson Correlation Analysis
 
-# Perform Statistical Tests
+### Perform Statistical Tests
 
 '''
 
@@ -601,19 +601,19 @@ def questions():
     plt.title('Correlation Matrix of Fire Risk Indices')
     st.pyplot(plt.gcf())
 
-    con10 = '''# Seasonal Fire Risk
+    con10 = '''### Seasonal Fire Risk
 
 The ANOVA test for fire risk between seasons indicates that there is no significant difference (p-value = 0.602277). This suggests that the observed variation in fire risk is not attributed to seasonal differences.
 
 **Insight:** Fire risk may not be strongly influenced by seasonal variations in this dataset. Other factors such as local conditions, human activities, or ignition sources might play a more significant role.
 
-# Temperature and Relative Humidity
+### Temperature and Relative Humidity
 
 The ANOVA tests for temperature and relative humidity across different months show significant differences (p-values < 0.05). This suggests that temperature and humidity vary significantly across months.
 
 **Insight:** Seasonal patterns in temperature and humidity can impact fire behavior and spread. Hotter and drier months likely pose higher fire risks compared to cooler and more humid months.
 
-# Correlation of Fire Risk Indices
+### Correlation of Fire Risk Indices
 
 The correlation matrix shows various correlations between fire risk indices and weather variables. Notably, the strongest positive correlation with fire area burned is observed with the Initial Spread Index (ISI) (0.008258), although it is relatively weak.
 
@@ -626,7 +626,7 @@ In summary, while there are significant variations in temperature and humidity a
     st.header(
         '6. How does the size of the affected area correlate with the various parameters? ')
 
-    con11 = '''# Hypothesis Testing: Does Temperature Significantly Affect the Size of the Affected Area?
+    con11 = '''### Hypothesis Testing: Does Temperature Significantly Affect the Size of the Affected Area?
 
 **Hypothesis:**
 - **Null Hypothesis (H0):** There is no significant relationship between temperature and the size of the affected area.
@@ -650,11 +650,11 @@ In summary, while there are significant variations in temperature and humidity a
     plt.title('Temperature vs. Fire Area')
     st.pyplot(plt.gcf())
 
-    con12 = '''# Interpreting the Correlation Coefficient
+    con12 = '''### Interpreting the Correlation Coefficient
 
 The correlation coefficient obtained between temperature and the size of the affected area is close to 0, indicating a weak linear relationship between these two variables.
 
-**Insights:**
+#### Insights:
 - **Weak Relationship:** The correlation coefficient being close to 0 suggests that there is a weak linear relationship between temperature and the size of the affected area. This means that changes in temperature are not strongly associated with changes in the size of the affected area by fires.
 - **Positive Correlation:** The positive sign of the correlation coefficient indicates that as temperature increases, there tends to be a slight increase in the size of the affected area. However, this relationship is weak.
 - **Limited Predictive Power:** Despite the positive correlation, the weak correlation coefficient suggests that temperature alone may not be a reliable predictor of the size of the affected area. Other factors not considered in the analysis may also influence the extent of fire damage.
@@ -663,11 +663,11 @@ In summary, while there is a weak positive relationship between temperature and 
 '''
     st.markdown(con12)
 
-    con13 = '''# Interpreting the Correlation Coefficient between Temperature and Size of Affected Area:
+    con13 = '''### Interpreting the Correlation Coefficient between Temperature and Size of Affected Area:
 
 The correlation coefficient between temperature and the size of the affected area is close to 0, indicating a weak linear relationship. Despite the positive correlation, the weak strength suggests that temperature alone may not be a reliable predictor of the size of the affected area.
 
-# Is there a Difference in the Size of the Affected Area Between Different Months?
+### Is there a Difference in the Size of the Affected Area Between Different Months?
 
 **Hypothesis:**
 - **Null Hypothesis (H0):** There is no significant difference in the size of the affected area between different months.
@@ -683,7 +683,7 @@ The obtained chi-square statistic is 2328.52, with a corresponding p-value close
 **Interpretation:**
 Since the p-value is much greater than the significance level (e.g., 0.05), we fail to reject the null hypothesis. This implies that there is no evidence to suggest that the size of the affected area differs significantly between different months.
 
-# How Do Wind Speed and Direction Influence the Size of the Affected Area?
+### How Do Wind Speed and Direction Influence the Size of the Affected Area?
 
 **Hypothesis:**
 - **Null Hypothesis (H0):** There is no significant relationship between wind speed/direction and the size of the affected area.
@@ -713,22 +713,22 @@ Since the p-value is much greater than the significance level (e.g., 0.05), we f
     plt.title('Wind Speed vs. Fire Area')
     st.pyplot(plt.gcf())
 
-    con14 = '''Interpretation:
+    con14 = '''### Interpretation:
 
-This coefficient represents the change in the size of the affected area for a one-unit increase in wind speed.
-A coefficient of 0.438 indicates that, on average, for every unit increase in wind speed, the size of the affected area increases by approximately 0.438 units.'''
+#### This coefficient represents the change in the size of the affected area for a one-unit increase in wind speed.
+#### A coefficient of 0.438 indicates that, on average, for every unit increase in wind speed, the size of the affected area increases by approximately 0.438 units.'''
 
     st.markdown(con14)
 
     st.header('7. Are there thresholds for certain parameters  that, when exceeded, dramatically increase fire risk?')
 
-    con15 = '''# Temperature (temp) and Fire Risk
+    con15 = '''### Temperature (temp) and Fire Risk
 
-**Hypothesis:** Higher temperatures significantly increase fire risk.
+        **Hypothesis:** Higher temperatures significantly increase fire risk.
 
-**Analysis:** We can perform a correlation analysis between temperature and fire area.
+        **Analysis:** We can perform a correlation analysis between temperature and fire area.
 
-**Insights:** If the correlation coefficient is significantly positive, it indicates that higher temperatures are associated with larger fire areas.
+        **Insights:** If the correlation coefficient is significantly positive, it indicates that higher temperatures are associated with larger fire areas.
 
 - **Correlation Coefficient:** 0.09784410734168458
 - **P-value:** 0.02610146057988555
@@ -748,7 +748,7 @@ The correlation coefficient between temperature and fire area is approximately 0
     plt.title('Temperature vs. Fire Area')
     st.pyplot(plt.gcf())
 
-    con16 = '''# Dryness Index (FFMC, DMC, DC, ISI) and Fire Risk
+    con16 = '''### Dryness Index (FFMC, DMC, DC, ISI) and Fire Risk
 
 **Hypothesis:** Higher values of FFMC, DMC, DC, and ISI increase fire risk.
 
@@ -818,7 +818,7 @@ If there is a significant difference in fire area between different index ranges
     plt.title('Wind Speed vs. Fire Area')
     st.pyplot(plt.gcf())
 
-    con18 = '''# Rainfall (rain):
+    con18 = '''### Rainfall (rain):
 
 **Hypothesis:** Higher rainfall decreases fire risk.
 
@@ -834,15 +834,15 @@ If there is a significant difference in fire area between different index ranges
 
     st.header('8. Given limited resources, which areas should be prioritized for prevention efforts based on their fire risk profile?')
 
-    con19 = '''# Correlation Analysis:
+    con19 = '''### Correlation Analysis:
 
-**Hypothesis:** There is a correlation between weather conditions (e.g., temperature, humidity, wind speed) and fire occurrence/severity.
+ **Hypothesis:** There is a correlation between weather conditions (e.g., temperature, humidity, wind speed) and fire occurrence/severity.
 
-**Method:** Calculate Pearson correlation coefficients between weather variables (temp, RH, wind, rain) and fire area (area).
+ **Method:** Calculate Pearson correlation coefficients between weather variables (temp, RH, wind, rain) and fire area (area).
 
-**Result:** Identify which weather variables have the strongest correlation with fire area.
+ **Result:** Identify which weather variables have the strongest correlation with fire area.
 
-**Actionable Insight:** Prioritize prevention efforts in areas where weather conditions conducive to fires occur frequently.
+ **Actionable Insight:** Prioritize prevention efforts in areas where weather conditions conducive to fires occur frequently.
 
 ## Pearson Correlation Coefficients:
 
@@ -871,7 +871,7 @@ Based on these correlations, prioritizing prevention efforts in areas where high
     plt.title('Correlation Matrix of Weather Variables and Fire Area')
     st.pyplot(plt.gcf())
 
-    con20 = '''# ANOVA (Analysis of Variance):
+    con20 = '''### ANOVA (Analysis of Variance):
 
 **Hypothesis:** There is a significant difference in fire severity (measured by fire area) between different months.
 
@@ -939,7 +939,7 @@ This clustering visualization is crucial for understanding the spatial dynamics 
     st.header(
         '9. Does the initial spread index (ISI) serve as an effective predictor of fire behavior and severity?')
 
-    con22 = '''# Correlation Analysis:
+    con22 = '''### Correlation Analysis:
 
 **Hypothesis:** There is a significant correlation between ISI and fire severity (measured by the 'area' column).
 
@@ -975,7 +975,7 @@ The analysis suggests that there is no significant correlation between ISI and f
     plt.title('Correlation between ISI and Fire Area')
     st.pyplot(plt.gcf())
 
-    con23 = '''# Regression Analysis:
+    con23 = '''### Regression Analysis:
 
 **Hypothesis:** ISI is a significant predictor of fire area.
 
@@ -1017,7 +1017,7 @@ Since the results of the regression analysis were not provided, we cannot determ
     plt.title('Regression: ISI vs Fire Area')
     st.pyplot(plt.gcf())
 
-    con24 = '''# Comparative Analysis:
+    con24 = '''### Comparative Analysis:
 
 **Hypothesis:** Fires with higher ISI values have significantly larger areas compared to fires with lower ISI values.
 
@@ -1070,7 +1070,7 @@ Therefore, according to this analysis, ISI may not be an effective predictor of 
 
     st.header('10. How does the interaction between temperature (Temp) and relative humidity (RH) affect the Fine Fuel Moisture Code (FFMC), and what implications does this have for fire susceptibility?')
 
-    con25 = '''# Correlation Analysis:
+    con25 = '''### Correlation Analysis:
 
 **Hypothesis:** There is a significant correlation between FFMC, temperature (Temp), and relative humidity (RH).
 
@@ -1083,8 +1083,6 @@ The Pearson correlation coefficient will determine the strength and direction of
 ## Insights:
 
 To assess the significance of the correlation, we need to look at the correlation coefficients and their corresponding p-values. If the p-value is less than the predetermined significance level (typically 0.05), we can conclude that there is a significant correlation between the variables.
-
-Unfortunately, the results of the correlation analysis were not provided, so we cannot determine whether there is a significant correlation between FFMC, temperature (Temp), and relative humidity (RH) without knowing the correlation coefficients and their associated p-values.
 '''
     st.markdown(con25)
     corr_matrix = df[['FFMC', 'temp', 'RH']].corr()
@@ -1100,7 +1098,7 @@ Unfortunately, the results of the correlation analysis were not provided, so we 
 
     st.write('Result: The correlation heatmap will show the correlation coefficients between FFMC, temperature, and relative humidity. A positive correlation between FFMC and temperature and a negative correlation between FFMC and relative humidity would suggest that higher temperatures and lower humidity levels lead to higher FFMC values.')
 
-    con26 = '''# Regression Analysis:
+    con26 = '''### Regression Analysis:
 
 **Hypothesis:** There is a significant linear relationship between FFMC, temperature (Temp), and relative humidity (RH).
 
@@ -1125,7 +1123,7 @@ Multiple linear regression will determine whether FFMC, temperature (Temp), and 
 
     st.write('Result: The regression output will show coefficients for temperature and relative humidity and their significance levels. A significant positive coefficient for temperature and a significant negative coefficient for relative humidity would indicate their impact on FFMC.')
 
-    con27 = '''# Interaction Analysis:
+    con27 = '''### Interaction Analysis:
 
 **Hypothesis:** The interaction between temperature (Temp) and relative humidity (RH) has a significant effect on FFMC.
 
@@ -1147,9 +1145,7 @@ In regression analysis, introducing an interaction term allows us to assess whet
     # Get summary
     st.write(model_interaction.summary())
 
-    con28 = '''# Result and Actionable Insights:
-
-## Result:
+    con28 = '''## Result:
 
 If the interaction term is significant, it suggests that the effect of temperature on FFMC depends on the level of relative humidity and vice versa.
 
