@@ -3,6 +3,8 @@
 ## Overview:
 This project focuses on the analysis of the Forest Fires UCI Dataset. The dataset provides information about forest fires in the northeast region of Portugal. Through various analytical techniques, this project aims to extract insights and valuable information from the dataset.
 
+![Demo](images/demo.png)
+
 ## Features:
 - **About**: Provides an overview of the project and its objectives.
 - **The Study**: Details the methodology and approach used in the analysis.
