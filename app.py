@@ -278,12 +278,12 @@ def questions():
     st.write('')
 
     # 2. Analysis of Fire Incidence by Day of the Week and Time of Day
-    st.header(
-        '2. Do specific days of the week or times of day show a higher incidence of fires?')
+    st.header('2. Do specific days of the week or times of day show a higher incidence of fires?')
 
-    con2 = '''### Day of the Week Analysis
+    con2 = ''' ### Day of the Week Analysis
 
     ### Hypothesis
+    
     There is a difference in the number of fires on different days of the week.
 
     We will use a one-way ANOVA test to compare the mean number of fires across different days of the week. If the p-value is significant, we will perform post-hoc tests (e.g., Tukey's HSD) to identify which days significantly differ from each other.
@@ -291,6 +291,7 @@ def questions():
     ## Time of Day Analysis
 
     ### Hypothesis
+    
     There is a difference in the number of fires during different times of the day.
 
     Since there's no 'hour' column in the dataset, we'll create time intervals (e.g., morning, afternoon, evening) based on the 'temp' column.
@@ -318,11 +319,11 @@ def questions():
 
     # Time of day analysis
     morning = data_cleaned[(data_cleaned['temp'] >= 6)
-                           & (data_cleaned['temp'] < 12)]
+                        & (data_cleaned['temp'] < 12)]
     afternoon = data_cleaned[(data_cleaned['temp'] >= 12)
-                             & (data_cleaned['temp'] < 18)]
+                            & (data_cleaned['temp'] < 18)]
     evening = data_cleaned[(data_cleaned['temp'] >= 18)
-                           | (data_cleaned['temp'] < 6)]
+                        | (data_cleaned['temp'] < 6)]
     time_counts = [morning.shape[0], afternoon.shape[0], evening.shape[0]]
     time_labels = ['Morning', 'Afternoon', 'Evening']
 
@@ -340,9 +341,9 @@ def questions():
     st.write("F-statistic:", f_statistic_time)
     st.write("p-value:", p_value_time)
 
-    con3 = '''## Day of the Week Analysis
+    con3 = ''' ## Day of the Week Analysis
 
-    **F-statistic:** 0.859  
+    **F-statistic :** 0.859  
     **p-value:** 0.525
 
     The p-value of 0.525 is not significant (p > 0.05), indicating that there is no significant difference in the number of fires across different days of the week.
@@ -370,7 +371,7 @@ def questions():
     st.header(
         '3. Which factors are the most critical predictors of forest fire occurrence or intensity?')
 
-    con4 = '''## Research Questions
+    con4 = ''' ## Research Questions
 
     1. **Does weather condition (temperature, humidity, wind speed, and rainfall) significantly affect forest fire occurrence?**
     2. **Is there a relationship between moisture content (Fine Fuel Moisture Code - FFMC, Duff Moisture Code - DMC, Drought Code - DC) and forest fire intensity?**
@@ -400,7 +401,7 @@ def questions():
     # Print summary
     st.write(model_weather.summary())
 
-    con5 = '''## 2. Moisture Content Analysis
+    con5 = ''' ## 2. Moisture Content Analysis
 
     **Hypothesis:** Moisture content significantly affects forest fire intensity.  
     **Statistical Analysis:** Pearson Correlation Coefficient  
@@ -417,7 +418,7 @@ def questions():
     plt.title('Correlation Heatmap')
     st.pyplot(plt)
 
-    con6 = '''## 3. Monthly and Daily Analysis
+    con6 = ''' ## 3. Monthly and Daily Analysis
 
     **Hypothesis:** Forest fire occurrence varies significantly across months and days of the week.  
     **Statistical Analysis:** ANOVA for months, Chi-square test for days of the week.  
@@ -452,7 +453,7 @@ def questions():
     st.header(
         '4. Do specific weather patterns (e.g., combinations of temperature, humidity, and wind) significantly increase fire risk?')
 
-    con7 = '''## Temperature Impact on Fire Occurrence
+    con7 = ''' ## Temperature Impact on Fire Occurrence
 
     **Hypothesis:** Higher temperatures lead to increased fire occurrence.  
     **Statistical Analysis:** Linear Regression  
@@ -480,42 +481,43 @@ def questions():
 
     st.write('Pearson correlation coefficient between wind speed and area burned: -0.0044273946986889065')
 
-    con8 = '''# Hypothesis: Higher temperatures lead to increased fire occurrence
+    con8 = ''' # Hypothesis: Higher temperatures lead to increased fire occurrence
 
-## Statistical Analysis
+    ## Statistical Analysis
 
-- **Regression Coefficient for Temperature (temp):** 0.2131
-- **Standard Error:** 0.175
-- **t-Statistic:** 1.218
-- **p-Value:** 0.224
-- **R-squared:** 0.003 (Adjusted R-squared: 0.001)
+    - **Regression Coefficient for Temperature (temp):** 0.2131
+    - **Standard Error:** 0.175
+    - **t-Statistic:** 1.218
+    - **p-Value:** 0.224
+    - **R-squared:** 0.003 (Adjusted R-squared: 0.001)
 
-### Actionable Insights
+    ### Actionable Insights
 
-- **Regression Coefficient:** The positive coefficient (0.2131) suggests that there is a positive relationship between temperature and the area burned by fire. However, the relationship is not statistically significant given the p-value of 0.224 (which is greater than the common significance level of 0.05). This means we do not have enough evidence to conclusively say that higher temperatures significantly increase the area burned.
-- **R-squared Value:** The R-squared value of 0.003 indicates that temperature alone explains only 0.3% of the variability in the area burned. This suggests that other factors not included in the model may play a more significant role in influencing fire occurrence and the area burned.
-- **Model Diagnostics:** The Durbin-Watson statistic of 0.843 indicates some degree of positive autocorrelation in the residuals. The high values of the Omnibus and Jarque-Bera tests indicate that the residuals are not normally distributed, suggesting that the model may not be well-specified.
+    - **Regression Coefficient:** The positive coefficient (0.2131) suggests that there is a positive relationship between temperature and the area burned by fire. However, the relationship is not statistically significant given the p-value of 0.224 (which is greater than the common significance level of 0.05). This means we do not have enough evidence to conclusively say that higher temperatures significantly increase the area burned.
+    - **R-squared Value:** The R-squared value of 0.003 indicates that temperature alone explains only 0.3% of the variability in the area burned. This suggests that other factors not included in the model may play a more significant role in influencing fire occurrence and the area burned.
+    - **Model Diagnostics:** The Durbin-Watson statistic of 0.843 indicates some degree of positive autocorrelation in the residuals. The high values of the Omnibus and Jarque-Bera tests indicate that the residuals are not normally distributed, suggesting that the model may not be well-specified.
 
-Given these results, while there is a positive relationship between temperature and fire occurrence, it is not statistically significant, and temperature alone is not a strong predictor of the area burned.
+    Given these results, while there is a positive relationship between temperature and fire occurrence, it is not statistically significant, and temperature alone is not a strong predictor of the area burned.
 
-## Wind Speed Impact on Fire Occurrence
+    ## Wind Speed Impact on Fire Occurrence
 
-- **Pearson Correlation Coefficient:**
+    - **Pearson Correlation Coefficient:**
 
-  - **Value:** -0.0044
+    - **Value:** -0.0044
 
-### Actionable Insights
+    ### Actionable Insights
 
-- The Pearson correlation coefficient between wind speed and the area burned is -0.0044, indicating a very weak and negative linear relationship. This value is close to zero, suggesting that there is almost no linear correlation between wind speed and the area burned.
-- Since the correlation is extremely weak, wind speed does not appear to be a significant predictor of the area burned by fires based on this analysis.
+    - The Pearson correlation coefficient between wind speed and the area burned is -0.0044, indicating a very weak and negative linear relationship. This value is close to zero, suggesting that there is almost no linear correlation between wind speed and the area burned.
+    - Since the correlation is extremely weak, wind speed does not appear to be a significant predictor of the area burned by fires based on this analysis.
 
-## Overall Insights and Recommendations
+    ## Overall Insights and Recommendations
 
-- **Temperature:** Although the hypothesis suggests that higher temperatures might lead to increased fire occurrence, the analysis does not provide statistically significant evidence to support this. Fire management strategies should consider a range of factors beyond just temperature when predicting fire risk.
-- **Wind Speed:** The almost negligible correlation between wind speed and area burned indicates that wind speed alone is not a useful predictor of fire occurrence or severity.
-- **Comprehensive Fire Risk Models:** Given the low R-squared value and the weak correlation with wind speed, it is clear that a more comprehensive model incorporating multiple variables (such as humidity, vegetation type, precipitation, human activities, and other meteorological factors) would likely provide better insights into fire risk and occurrence.
-'''
+    - **Temperature:** Although the hypothesis suggests that higher temperatures might lead to increased fire occurrence, the analysis does not provide statistically significant evidence to support this. Fire management strategies should consider a range of factors beyond just temperature when predicting fire risk.
+    - **Wind Speed:** The almost negligible correlation between wind speed and area burned indicates that wind speed alone is not a useful predictor of fire occurrence or severity.
+    - **Comprehensive Fire Risk Models:** Given the low R-squared value and the weak correlation with wind speed, it is clear that a more comprehensive model incorporating multiple variables (such as humidity, vegetation type, precipitation, human activities, and other meteorological factors) would likely provide better insights into fire risk and occurrence.
+    '''
     st.markdown(con8)
+
     st.write('')
     st.write('')
     st.header('5. Is there a seasonal trend in fire risk? ')
