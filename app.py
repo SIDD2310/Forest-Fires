@@ -199,8 +199,8 @@ def questions():
     st.markdown(
         '''[5. Is there a seasonal trend in fire risk?](#5-is-there-a-seasonal-trend-in-fire-risk)''', unsafe_allow_html=True)
     st.markdown('''[6. How does the size of the affected area correlate with the various parameters?](#6-how-does-the-size-of-the-affected-area-correlate-with-the-various-parameters)''', unsafe_allow_html=True)
-    st.markdown('''[7. Are there thresholds for certain parameters (e.g., temperature, dryness index) that, when exceeded, dramatically increase fire risk?](#7-are-there-thresholds-for-certain-parameters-eg-temperature-dryness-index-that-when-exceeded-dramatically-increase-fire-risk)''', unsafe_allow_html=True)
-    st.markdown('''[8. Given limited resources, which areas should be prioritized for prevention efforts (e.g., fuel reduction, public education) based on their fire risk profile?](#8-given-limited-resources-which-areas-should-be-prioritized-for-prevention-efforts-eg-fuel-reduction-public-education-based-on-their-fire-risk-profile)''', unsafe_allow_html=True)
+    st.markdown('''[7. Are there thresholds for certain parameters that, when exceeded, dramatically increase fire risk?](#7-are-there-thresholds-for-certain-parameters-that-when-exceeded-dramatically-increase-fire-risk)''', unsafe_allow_html=True)
+    st.markdown('''[8. Given limited resources, which areas should be prioritized for prevention efforts based on their fire risk profile?](#8-given-limited-resources-which-areas-should-be-prioritized-for-prevention-efforts-based-on-their-fire-risk-profile)''', unsafe_allow_html=True)
     st.markdown('''[9. Does the initial spread index (ISI) serve as an effective predictor of fire behavior and severity?](#9-does-the-initial-spread-index-isi-serve-as-an-effective-predictor-of-fire-behavior-and-severity)''', unsafe_allow_html=True)
     st.markdown('''[10. How does the interaction between temperature (Temp) and relative humidity (RH) affect the Fine Fuel Moisture Code (FFMC), and what implications does this have for fire susceptibility?](#10-how-does-the-interaction-between-temperature-temp-and-relative-humidity-rh-affect-the-fine-fuel-moisture-code-ffmc-and-what-implications-does-this-have-for-fire-susceptibility)''', unsafe_allow_html=True)
 
@@ -720,7 +720,7 @@ A coefficient of 0.438 indicates that, on average, for every unit increase in wi
 
     st.markdown(con14)
 
-    st.header('7. Are there thresholds for certain parameters (e.g., temperature, dryness index) that, when exceeded, dramatically increase fire risk?')
+    st.header('7. Are there thresholds for certain parameters  that, when exceeded, dramatically increase fire risk?')
 
     con15 = '''# Temperature (temp) and Fire Risk
 
@@ -832,7 +832,7 @@ If there is a significant difference in fire area between different index ranges
 
     st.markdown(con18)
 
-    st.header('8. Given limited resources, which areas should be prioritized for prevention efforts (e.g., fuel reduction, public education) based on their fire risk profile?')
+    st.header('8. Given limited resources, which areas should be prioritized for prevention efforts based on their fire risk profile?')
 
     con19 = '''# Correlation Analysis:
 
