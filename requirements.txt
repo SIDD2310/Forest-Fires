@@ -4,8 +4,8 @@ pandas
 seaborn
 matplotlib
 scikit-learn
-streamlit_pdf_viewer
 scipy
-numpy
 joblib
 statsmodels
+geopandas
+pysal
