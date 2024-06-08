@@ -9,3 +9,4 @@ joblib
 statsmodels
 geopandas
 pysal
+streamlit_pdf_viewer
