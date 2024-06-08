@@ -18,6 +18,11 @@ from statsmodels.formula.api import ols
 from sklearn.linear_model import LinearRegression
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
+import geopandas as gpd
+from pysal.lib import weights
+from pysal.explore import esda
+import matplotlib.pyplot as plt
+import numpy as np
 
 df = pd.read_csv('forestfires.csv')
 
@@ -192,976 +197,641 @@ def questions():
              unsafe_allow_html=True)
 
     st.header('Questions (Click to redirect to the answer)')
-    st.markdown('''[1. How much does rainfall mitigate fire risk, and is there a lag effect?](#1-how-much-does-rainfall-mitigate-fire-risk-and-is-there-a-lag-effect)''', unsafe_allow_html=True)
-    st.markdown('''[2. Do specific days of the week or times of day show a higher incidence of fires?](#2-do-specific-days-of-the-week-or-times-of-day-show-a-higher-incidence-of-fires)''', unsafe_allow_html=True)
-    st.markdown('''[3. Which factors are the most critical predictors of forest fire occurrence or intensity?](#3-which-factors-are-the-most-critical-predictors-of-forest-fire-occurrence-or-intensity)''', unsafe_allow_html=True)
-    st.markdown('''[4. Do specific weather patterns significantly increase fire risk?](#4-do-specific-weather-patterns-e-g-combinations-of-temperature-humidity-and-wind-significantly-increase-fire-risk)''', unsafe_allow_html=True)
+    st.markdown('''[1. How do meteorological conditions (temperature, humidity, wind speed, and rain) impact the size of the burned area?](#1-how-do-meteorological-conditions-temperature-humidity-wind-speed-and-rain-impact-the-size-of-the-burned-area)''', unsafe_allow_html=True)
+    st.markdown('''[2. Are there significant differences in the burned area across different months of the year?](#2-are-there-significant-differences-in-the-burned-area-across-different-months-of-the-year)''', unsafe_allow_html=True)
+    st.markdown('''[3. Do higher values of fire danger indices (FFMC, DMC, DC, ISI) predict larger burned areas?](#3-do-higher-values-of-fire-danger-indices-ffmc-dmc-dc-isi-predict-larger-burned-areas)''', unsafe_allow_html=True)
+    st.markdown('''[4. Does the impact of wind speed on the burned area vary when combined with other factors like temperature and humidity?](#4-does-the-impact-of-wind-speed-on-the-burned-area-vary-when-combined-with-other-factors-like-temperature-and-humidity)''', unsafe_allow_html=True)
     st.markdown(
-        '''[5. Is there a seasonal trend in fire risk?](#5-is-there-a-seasonal-trend-in-fire-risk)''', unsafe_allow_html=True)
-    st.markdown('''[6. How does the size of the affected area correlate with the various parameters?](#6-how-does-the-size-of-the-affected-area-correlate-with-the-various-parameters)''', unsafe_allow_html=True)
-    st.markdown('''[7. Are there thresholds for certain parameters that, when exceeded, dramatically increase fire risk?](#7-are-there-thresholds-for-certain-parameters-that-when-exceeded-dramatically-increase-fire-risk)''', unsafe_allow_html=True)
-    st.markdown('''[8. Given limited resources, which areas should be prioritized for prevention efforts based on their fire risk profile?](#8-given-limited-resources-which-areas-should-be-prioritized-for-prevention-efforts-based-on-their-fire-risk-profile)''', unsafe_allow_html=True)
-    st.markdown('''[9. Does the initial spread index (ISI) serve as an effective predictor of fire behavior and severity?](#9-does-the-initial-spread-index-isi-serve-as-an-effective-predictor-of-fire-behavior-and-severity)''', unsafe_allow_html=True)
-    st.markdown('''[10. How does the interaction between temperature (Temp) and relative humidity (RH) affect the Fine Fuel Moisture Code (FFMC), and what implications does this have for fire susceptibility?](#10-how-does-the-interaction-between-temperature-temp-and-relative-humidity-rh-affect-the-fine-fuel-moisture-code-ffmc-and-what-implications-does-this-have-for-fire-susceptibility)''', unsafe_allow_html=True)
+        '''[5. Does rainfall significantly reduce the burned area in forest fires?](#5-does-rainfall-significantly-reduce-the-burned-area-in-forest-fires)''', unsafe_allow_html=True)
+    st.markdown('''[6. Are certain geographical areas (represented by X and Y coordinates) more prone to larger burned areas?](#6-are-certain-geographical-areas-represented-by-x-and-y-coordinates-more-prone-to-larger-burned-areas)''', unsafe_allow_html=True)
+    st.markdown('''[7. What is the relationship between the day of the week and the size of the burned area?](#7-what-is-the-relationship-between-the-day-of-the-week-and-the-size-of-the-burned-area)''', unsafe_allow_html=True)
+    st.markdown('''[8. Do higher temperatures correlate with larger burned areas in forest fires?](#8-do-higher-temperatures-correlate-with-larger-burned-areas-in-forest-fires)''', unsafe_allow_html=True)
+    st.markdown('''[9. Is there a significant difference in the burned area between weekends and weekdays?](#9-is-there-a-significant-difference-in-the-burned-area-between-weekends-and-weekdays)''', unsafe_allow_html=True)
+    st.markdown('''[10. How does relative humidity affect the burned area in forest fires?](#10-how-does-relative-humidity-affect-the-burned-area-in-forest-fires)''', unsafe_allow_html=True)
 
     data_cleaned = load_data()
     data_cleaned['Date'] = pd.date_range(
         start='2020-01-01', periods=len(data_cleaned), freq='D')
 
-    # 1. Rainfall Mitigation Analysis
-    st.header(
-        '1. How much does rainfall mitigate fire risk, and is there a lag effect?')
+    st.header('1. How do meteorological conditions (temperature, humidity, wind speed, and rain) impact the size of the burned area?')
+    st.write('(a) Correlation Analysis: To determine the strength and direction of the relationship between meteorological variables and the burned area.')
 
-    st.write('(a) Descriptive Statistics Hypothesis: There is a measurable pattern in rainfall and fire incidents data.')
+    # Select numeric columns
+    numeric_cols = df.select_dtypes(include=[np.number])
+    correlation_matrix = numeric_cols.corr()
 
-    # Plotting the data
-    plt.figure(figsize=(12, 6))
+    # Plotting the correlation matrix heatmap
+    fig, ax = plt.subplots(figsize=(10, 8))
+    sns.heatmap(correlation_matrix, annot=True, fmt='.2f', cmap='coolwarm', vmin=-1, vmax=1, linewidths=0.5, ax=ax)
+    ax.set_title('Correlation Matrix Heatmap')
+    st.pyplot(fig)
+    plt.close(fig)  # Close the figure to prevent it from displaying inappropriately
 
-    # Plot rainfall over time
-    plt.subplot(2, 1, 1)
-    plt.plot(data_cleaned['Date'], data_cleaned['rain'], label='Rainfall')
-    plt.xlabel('Date')
-    plt.ylabel('Rainfall (mm)')
-    plt.title('Rainfall Over Time')
-    plt.legend()
+    st.write('(b) Hypothesis Testing: To test if there is a statistically significant relationship between meteorological conditions and the burned area.')
+    con29 = '''### Hypothesis Formulation
 
-    # Plot burned area over time
-    plt.subplot(2, 1, 2)
-    plt.plot(data_cleaned['Date'], data_cleaned['area'],
-             label='Burned Area', color='orange')
-    plt.xlabel('Date')
-    plt.ylabel('Burned Area (ha)')
-    plt.title('Burned Area Over Time')
-    plt.legend()
+**Null Hypothesis (𝐻₀):** There is a significant relationship between meteorological conditions and the burned area.
 
-    plt.tight_layout()
-    st.pyplot(plt)
+**Alternative Hypothesis (𝐻ₐ):** There is no significant relationship between meteorological conditions and the burned area.
 
-    st.write('(b) Correlation Analysis Hypothesis: There is a significant negative correlation between rainfall and fire incidents.')
-    correlation, p_value = pearsonr(data_cleaned['rain'], data_cleaned['area'])
-    st.write(f'Correlation: {correlation}, P-value: {p_value}')
+### Hypothesis Tests
 
-    # Plot correlation
-    plt.figure(figsize=(8, 6))
-    sns.scatterplot(x='rain', y='area', data=data_cleaned)
-    plt.xlabel('Rainfall (mm)')
-    plt.ylabel('Burned Area (ha)')
-    plt.title('Correlation between Rainfall and Burned Area')
-    st.pyplot(plt)
+Conduct t-tests for the correlation coefficients to determine their significance.
 
+Use a significance level (α) of 0.05.'''
+
+    st.markdown(con29)
+
+    X = df[['temp', 'RH', 'wind', 'rain']]
+    y = df['area']
+
+    # Adding a constant to the model
+    X = sm.add_constant(X)
+
+    # Fitting the regression model
+    model = sm.OLS(y, X).fit()
+    st.write(model.summary())
+
+    # Checking for multicollinearity
+    from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+    # VIF DataFrame
+    vif_data = pd.DataFrame()
+    vif_data["feature"] = X.columns
+    vif_data["VIF"] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
+    st.write(vif_data)
+    
     con1 = ''' ### Analysis Summary
 
-    #### Weak Correlation:
+#### R-squared
+- **R-squared: 0.012**
+  - This indicates that only 1.2% of the variance in the burned area is explained by the meteorological variables (temperature, humidity, wind speed, and rain). This is a very low value, suggesting that other factors might be more important in determining the burned area.
 
-    Based on correlation analysis, the observed correlation between rainfall and burned area is very weak (-0.034) and statistically insignificant (p-value = 0.476). This suggests that there might not be a direct linear relationship between these variables. Other factors like temperature, wind speed, vegetation type, and human activities could be influencing burned area.
+- **Adj. R-squared: 0.004**
+  - Adjusted R-squared accounts for the number of predictors in the model. This low value further confirms that the model does not explain much of the variability in the burned area.
 
-    #### Stationarity:
+#### F-statistic
+- **F-statistic: 1.512**
+- **Prob (F-statistic): 0.197**
+  - The F-statistic tests the overall significance of the model. A p-value of 0.197 (greater than 0.05) indicates that the model is not statistically significant.
 
-    The Augmented Dickey-Fuller (ADF) test indicates strong evidence against non-stationarity in the time series data after differencing (ADF statistic = -4.985, p-value = 2.375e-05). This implies that the data is stable over time, which is crucial for time series analysis. Any observed patterns or relationships are likely genuine rather than artifacts of non-stationarity.
+#### Coefficients and p-values
+- **Constant:**
+  - Coefficient: -6.4385
+  - p-value: 0.750 (not statistically significant)
 
-    #### Lagged Effect Interpretation:
+- **Temperature:**
+  - Coefficient: 1.0096
+  - p-value: 0.087 (not statistically significant, though it is close to the threshold)
 
-    The lagged regression model examines the effect of past rainfall on the current burned area. However, there seems to be a discrepancy with the hypothesis, as it states "Rainfall has a lagged effect on reducing fire incidents." In this case, the dependent variable in the lagged regression model should ideally be fire incidents rather than burned area for a more relevant analysis.
+- **Humidity:**
+  - Coefficient: -0.1098
+  - p-value: 0.593 (not statistically significant)
 
-    #### Insights:
+- **Wind Speed:**
+  - Coefficient: 1.2787
+  - p-value: 0.428 (not statistically significant)
 
-    1. The weak and statistically insignificant correlation between rainfall and burned area suggests the presence of other influencing factors.
-    2. The stationarity of the time series data indicates stability over time, supporting genuine observed patterns.
-    3. Aligning the lagged regression model with the hypothesis would provide more actionable insights for fire risk management and mitigation strategies.
+- **Rain:**
+  - Coefficient: -2.8302
+  - p-value: 0.769 (not statistically significant)
 
-    #### Conclusion:
+#### Multicollinearity Check
+- **Variance Inflation Factor (VIF):**
+  - VIF values are all below 2, indicating that multicollinearity is not a concern for this model.
 
-    While the correlation analysis did not reveal a significant relationship between rainfall and burned area, the stationarity of the time series data suggests further investigation is warranted. Analyzing the lagged effect of rainfall on fire incidents, as per the hypothesis, would offer more relevant insights for fire risk management strategies.
+#### Conclusion
+Given the results, it is clear that the current model does not significantly explain the variability in the burned area.
+
     '''
     st.markdown(con1)
     st.write('')
     st.write('')
 
     # 2. Analysis of Fire Incidence by Day of the Week and Time of Day
-    st.header('2. Do specific days of the week or times of day show a higher incidence of fires?')
+    st.header('2. Are there significant differences in the burned area across different months of the year?')
+    st.write('ANOVA Test: Perform a one-way ANOVA test to compare the means of the burned area across different months.')
+    
+    month_area_stats = df.groupby('month')['area'].agg(['mean', 'std'])
+    st.write(month_area_stats)
 
-    con2 = ''' ### Day of the Week Analysis
+    # ANOVA test
+    anova_result = stats.f_oneway(
+        df[df['month'] == 'jan']['area'],
+        df[df['month'] == 'feb']['area'],
+        df[df['month'] == 'mar']['area'],
+        df[df['month'] == 'apr']['area'],
+        df[df['month'] == 'may']['area'],
+        df[df['month'] == 'jun']['area'],
+        df[df['month'] == 'jul']['area'],
+        df[df['month'] == 'aug']['area'],
+        df[df['month'] == 'sep']['area'],
+        df[df['month'] == 'oct']['area'],
+        df[df['month'] == 'nov']['area'],
+        df[df['month'] == 'dec']['area']
+    )
+    st.write(f'ANOVA result: F={anova_result.statistic}, p={anova_result.pvalue}')
+    
+    
+    st.write('To visually inspect the burned area distribution across months')
+    fig, ax = plt.subplots(figsize=(12, 6))
+    sns.boxplot(x='month', y='area', data=data_cleaned, ax=ax)
+    ax.set_title('Burned Area Distribution by Month')
+    ax.set_xlabel('Month')
+    ax.set_ylabel('Burned Area')
+    st.pyplot(fig)
+    plt.close(fig)
+    
+    con2 = ''' ### Interpretation of ANOVA Results
 
-#### Hypothesis
+#### ANOVA Test
+- **F-statistic: 0.2529**
+- **p-value: 0.9931**
 
-There is a difference in the number of fires on different days of the week.
+Since the p-value is much greater than 0.05, we fail to reject the null hypothesis. This means there is no statistically significant difference in the mean burned area across different months.
 
-We will use a one-way ANOVA test to compare the mean number of fires across different days of the week. If the p-value is significant, we will perform post-hoc tests (e.g., Tukey's HSD) to identify which days significantly differ from each other.
+#### Descriptive Statistics Summary
 
-### Time of Day Analysis
+From the descriptive statistics:
 
-#### Hypothesis
+- There are variations in the mean and standard deviation of the burned area across different months.
+- Some months (e.g., January and November) have zero mean burned area, indicating no fires were recorded in those months.
+- Months like August, September, and July show higher variability in the burned area, as indicated by their larger standard deviations.
 
-There is a difference in the number of fires during different times of the day.
-
-Since there's no 'hour' column in the dataset, we'll create time intervals (e.g., morning, afternoon, evening) based on the 'temp' column.
-
-We'll group the data into time intervals and then perform a similar one-way ANOVA test as in the day of the week analysis.
     '''
     st.markdown(con2)
 
-    # Day of the week analysis
-    day_counts = data_cleaned['day'].value_counts()
-
-    # Plot the distribution of fires across days of the week
-    plt.figure(figsize=(8, 6))
-    sns.barplot(x=day_counts.index, y=day_counts.values)
-    plt.title('Number of Fires by Day of the Week')
-    plt.xlabel('Day of the Week')
-    plt.ylabel('Number of Fires')
-    st.pyplot(plt)
-
-    f_statistic, p_value = f_oneway(
-        *[data_cleaned[data_cleaned['day'] == day]['area'] for day in data_cleaned['day'].unique()])
-    st.write("Day of the Week Analysis:")
-    st.write("F-statistic:", f_statistic)
-    st.write("p-value:", p_value)
-
-    # Time of day analysis
-    morning = data_cleaned[(data_cleaned['temp'] >= 6)
-                        & (data_cleaned['temp'] < 12)]
-    afternoon = data_cleaned[(data_cleaned['temp'] >= 12)
-                            & (data_cleaned['temp'] < 18)]
-    evening = data_cleaned[(data_cleaned['temp'] >= 18)
-                        | (data_cleaned['temp'] < 6)]
-    time_counts = [morning.shape[0], afternoon.shape[0], evening.shape[0]]
-    time_labels = ['Morning', 'Afternoon', 'Evening']
-
-    plt.figure(figsize=(8, 6))
-    sns.barplot(x=time_labels, y=time_counts)
-    plt.title('Number of Fires by Time of Day')
-    plt.xlabel('Time of Day')
-    plt.ylabel('Number of Fires')
-    st.pyplot(plt)
-
-    # Perform one-way ANOVA for time of day
-    f_statistic_time, p_value_time = f_oneway(
-        morning['area'], afternoon['area'], evening['area'])
-    st.write("\nTime of Day Analysis:")
-    st.write("F-statistic:", f_statistic_time)
-    st.write("p-value:", p_value_time)
-
-    con3 = ''' ### Day of the Week Analysis
-
-**F-statistic:** 0.859  
-**p-value:** 0.525
-
-The p-value of 0.525 is not significant (p > 0.05), indicating that there is no significant difference in the number of fires across different days of the week.
-
-### Time of Day Analysis
-
-**F-statistic:** 1.730  
-**p-value:** 0.178
-
-Similarly, the p-value of 0.178 is also not significant (p > 0.05), suggesting that there is no significant difference in the number of fires during different times of the day.
-
-## Actionable Insights
-
-### Day of the Week:
-Since there is no significant difference in fire incidence across days of the week, resources can be allocated evenly throughout the week for fire prevention and control measures.
-
-### Time of Day:
-The lack of significant difference in fire incidence across time intervals suggests that fire risk may not be strongly associated with specific times of the day in this dataset. However, it's still crucial to maintain vigilance and readiness for fire incidents at all times.
-
-These insights can guide fire management strategies and resource allocation, focusing on overall preparedness rather than specific days or times.
-    '''
-    st.markdown(con3)
-
+    
     # 3. Critical Predictors of Forest Fire Occurrence or Intensity
     st.header(
-        '3. Which factors are the most critical predictors of forest fire occurrence or intensity?')
+        '3. Do higher values of fire danger indices (FFMC, DMC, DC, ISI) predict larger burned areas?')
 
-    con4 = ''' ## Research Questions
+    con4 = ''' ### Assumptions Checking
 
-1. **Does weather condition (temperature, humidity, wind speed, and rainfall) significantly affect forest fire occurrence?**
-2. **Is there a relationship between moisture content (Fine Fuel Moisture Code - FFMC, Duff Moisture Code - DMC, Drought Code - DC) and forest fire intensity?**
-3. **Do forest fires vary significantly across different months and days of the week?**
+#### Linearity
+- Check the scatterplots of each independent variable against the dependent variable to visually inspect linearity.
 
-## Analysis
+#### Independence
+- Typically assumed in regression analysis unless the data has a time series structure.
 
-### 1. Weather Condition Analysis
+#### Homoscedasticity
+- Check the residuals versus fitted values plot to assess if the spread of residuals is consistent across all levels of the independent variables.
 
-**Hypothesis:** Weather conditions significantly affect forest fire occurrence.  
-**Statistical Analysis:** Multiple Linear Regression  
-**Result Interpretation:** Determine coefficients of weather variables and their significance.  
-**Actionable Insights:** Identify which weather variables have the most impact on forest fire occurrence.
+#### Normality
+- Examine the histogram or Q-Q plot of residuals to assess if they follow a normal distribution.
+
+### Multiple Linear Regression
+
+#### Model
+- Fit a multiple linear regression model with the fire danger indices as independent variables and the burned area as the dependent variable.
+
+#### Examination
+- Examine the coefficients, p-values, and goodness-of-fit statistics of the model to assess its performance.
+
     '''
     st.markdown(con4)
+    X = df[['FFMC', 'DMC', 'DC', 'ISI']]
+    # Dependent variable: burned area
+    y = df['area']
 
-    # Prepare data for weather condition analysis
-    X_weather = data_cleaned[['temp', 'RH', 'wind', 'rain']]
-    y_weather = data_cleaned['area']
+    # Adding a constant term to the independent variables
+    X = sm.add_constant(X)
 
-    # Add constant
-    X_weather = sm.add_constant(X_weather)
+    # Fitting the multiple linear regression model
+    model = sm.OLS(y, X).fit()
 
-    # Fit the model
-    model_weather = sm.OLS(y_weather, X_weather).fit()
+    # Printing the summary of the regression model
+    st.write(model.summary())
+    
 
-    # Print summary
-    st.write(model_weather.summary())
+    con5 = ''' ## Interpretation of Regression Results
 
-    con5 = ''' ## 2. Moisture Content Analysis
+### Model Performance
+- **R-squared: 0.006**
+- **Adjusted R-squared: -0.002**
+  - The R-squared value indicates that only 0.6% of the variance in the burned area is explained by the independent variables. The negative adjusted R-squared suggests that the model does not improve upon the baseline.
 
-    **Hypothesis:** Moisture content significantly affects forest fire intensity.  
-    **Statistical Analysis:** Pearson Correlation Coefficient  
-    **Result Interpretation:** Check correlation between moisture content variables and fire area.  
-    **Actionable Insights:** Identify the moisture content variables most strongly correlated with fire intensity.
+### F-statistic
+- **F-statistic: 0.7820**
+- **Prob (F-statistic): 0.537**
+  - The F-statistic tests the overall significance of the model. With a p-value of 0.537 (greater than 0.05), the model is not statistically significant.
+
+### Coefficients and p-values
+- **Constant (Intercept):**
+  - Coefficient: -20.7883
+  - Standard Error: 52.463
+  - p-value: 0.692 (not statistically significant)
+- **FFMC:**
+  - Coefficient: 0.3268
+  - Standard Error: 0.627
+  - p-value: 0.602 (not statistically significant)
+- **DMC:**
+  - Coefficient: 0.0726
+  - Standard Error: 0.062
+  - p-value: 0.241 (not statistically significant)
+- **DC:**
+  - Coefficient: -0.0009
+  - Standard Error: 0.016
+  - p-value: 0.956 (not statistically significant)
+- **ISI:**
+  - Coefficient: -0.3957
+  - Standard Error: 0.733
+  - p-value: 0.589 (not statistically significant)
+
+### Conclusion
+The regression results indicate that the model does not perform well in explaining the variability in the burned area. None of the independent variables (FFMC, DMC, DC, ISI) are statistically significant predictors of burned area.
+
     '''
     st.markdown(con5)
 
-    # Moisture content analysis
-    corr_matrix = data_cleaned[['FFMC', 'DMC', 'DC', 'area']].corr()
-
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt=".2f")
-    plt.title('Correlation Heatmap')
-    st.pyplot(plt)
-
-    con6 = ''' ## 3. Monthly and Daily Analysis
-
-    **Hypothesis:** Forest fire occurrence varies significantly across months and days of the week.  
-    **Statistical Analysis:** ANOVA for months, Chi-square test for days of the week.  
-    **Result Interpretation:** Determine if there are significant differences in fire occurrence across months and days.  
-    **Actionable Insights:** Identify months and days with higher likelihood of forest fires.
-
-    - **F-Statistic:** 0.2528525500660293  
-    **P-value:** 0.9931307408492104  
-    - **Chi-square Statistic:** 1507.9656777601674  
-    **P-value:** 0.43748738637053414
-
-    ### Weather Condition Analysis Insights
-
-    **Hypothesis Confirmation:** The analysis does not support the hypothesis that weather conditions significantly affect forest fire occurrence, as indicated by the insignificant p-values for temperature (p = 0.364), relative humidity (p = 0.747), wind speed (p = 0.812), and rainfall (p = 0.513).  
-    **Actionable Insights:** Despite the lack of significance, it's still valuable to understand the direction of the coefficients. For instance, while not statistically significant, a positive coefficient for wind speed suggests a potential positive relationship with fire occurrence, albeit not strong enough to reach significance. However, this insight should be taken cautiously due to the lack of statistical significance.
-
-    ### Moisture Content Analysis Insights
-
-    **Hypothesis Confirmation:** The analysis method used (Pearson Correlation Coefficient) is not explicitly mentioned in the provided output. However, actionable insights would involve identifying moisture content variables strongly correlated with fire intensity.  
-    **Actionable Insights:** Based on the correlation analysis, identify which moisture content variables, such as FFMC, DMC, and DC, are most strongly correlated with fire intensity. This insight can inform forest management strategies focusing on moisture control to mitigate fire risk.
-
-    ### Monthly and Daily Analysis Insights
-
-    **Hypothesis Confirmation:** The analysis indicates that there are no significant differences in fire occurrence across months (p = 0.993) and days of the week (p = 0.437), based on the F-statistic and Chi-square test, respectively.  
-    **Actionable Insights:** Despite the lack of significance, it's still essential to monitor fire occurrence consistently across all months and days of the week. While there may not be significant variations, maintaining vigilance and preparedness throughout the year is crucial for effective fire management.
-
-    Overall, while some hypotheses were not supported by the analysis, the insights still provide valuable information for forest management strategies. It's important to continually monitor and analyze data to refine understanding and improve forest fire prevention and response efforts.
-    '''
-    st.markdown(con6)
-
+    
     # 4. Weather Patterns and Fire Risk
     st.header(
-        '4. Do specific weather patterns (e.g., combinations of temperature, humidity, and wind) significantly increase fire risk?')
+        '4. Does the impact of wind speed on the burned area vary when combined with other factors like temperature and humidity?')
 
-    con7 = ''' ## Temperature Impact on Fire Occurrence
+    con7 = ''' ### Multiple Linear Regression with Interaction Terms
 
-    **Hypothesis:** Higher temperatures lead to increased fire occurrence.  
-    **Statistical Analysis:** Linear Regression  
-    **Actionable Insights:** If the regression coefficient for temperature is positive and statistically significant, it suggests that as temperature increases, so does the likelihood of fire occurrence. This insight can inform fire management strategies to prioritize resources during hot weather conditions.
+#### Model Specification
+- Fit a multiple linear regression model with the main effects (temperature, humidity, wind speed) and their interaction terms.
+
+#### Examination
+- Examine the coefficients, p-values, and goodness-of-fit statistics of the model to assess its performance.
+
+### Interpretation of Interaction Terms
+
+#### Coefficients of Interaction Terms
+- The coefficients of the interaction terms indicate how the impact of wind speed on the burned area varies with temperature and humidity.
+- Positive coefficients suggest that the effect of wind speed on burned area increases with increasing values of temperature or humidity.
+- Negative coefficients suggest that the effect of wind speed on burned area decreases with increasing values of temperature or humidity.
+- The p-values associated with the interaction terms indicate whether these effects are statistically significant.
     '''
     st.markdown(con7)
 
-    # Linear regression for temperature impact
-    X = sm.add_constant(data_cleaned['temp'])  # adding a constant
-    y = data_cleaned['area']
-    model = sm.OLS(y, X).fit()
-    predictions = model.predict(X)
+    X = df[['wind', 'temp', 'RH']]
+    # Dependent variable: burned area
+    y = df['area']
 
-    # Print the summary
+    # Adding interaction terms
+    X['wind_temp'] = X['wind'] * X['temp']
+    X['wind_RH'] = X['wind'] * X['RH']
+
+    # Adding a constant term
+    X = sm.add_constant(X)
+
+    # Fitting the multiple linear regression model
+    model = sm.OLS(y, X).fit()
+
+    # Printing the summary of the regression model
     st.write(model.summary())
 
-    # Plot the regression line
-    plt.figure(figsize=(8, 6))
-    plt.scatter(data_cleaned['temp'], data_cleaned['area'])
-    plt.plot(data_cleaned['temp'], predictions, color='red')
-    plt.xlabel('Temperature')
-    plt.ylabel('Area Burned')
-    plt.title('Temperature vs. Area Burned')
-    st.pyplot(plt)
+    con8 = ''' ## Interpretation of Regression Results
 
-    st.write('Pearson correlation coefficient between wind speed and area burned: -0.0044273946986889065')
+### Model Performance
+- **R-squared: 0.012**
+- **Adjusted R-squared: 0.003**
+  - The R-squared value indicates that only 1.2% of the variance in the burned area is explained by the independent variables and interaction terms. The adjusted R-squared is also very low, suggesting that the model does not improve upon the baseline.
 
-    con8 = ''' # Hypothesis: Higher temperatures lead to increased fire occurrence
+### F-statistic
+- **F-statistic: 1.275**
+- **Prob (F-statistic): 0.273**
+  - The F-statistic tests the overall significance of the model. With a p-value of 0.273 (greater than 0.05), the model is not statistically significant.
 
-    ## Statistical Analysis
+### Coefficients and p-values
+- **Constant (Intercept):**
+  - Coefficient: -3.0864
+  - Standard Error: 43.674
+  - p-value: 0.944 (not statistically significant)
+- **Wind Speed:**
+  - Coefficient: 0.7984
+  - Standard Error: 7.546
+  - p-value: 0.916 (not statistically significant)
+- **Temperature (temp):**
+  - Coefficient: 0.5217
+  - Standard Error: 1.438
+  - p-value: 0.717 (not statistically significant)
+- **Relative Humidity (RH):**
+  - Coefficient: 0.0056
+  - Standard Error: 0.501
+  - p-value: 0.991 (not statistically significant)
+- **Interaction Term (wind_temp):**
+  - Coefficient: 0.1139
+  - Standard Error: 0.275
+  - p-value: 0.679 (not statistically significant)
+- **Interaction Term (wind_RH):**
+  - Coefficient: -0.0320
+  - Standard Error: 0.094
+  - p-value: 0.735 (not statistically significant)
 
-    - **Regression Coefficient for Temperature (temp):** 0.2131
-    - **Standard Error:** 0.175
-    - **t-Statistic:** 1.218
-    - **p-Value:** 0.224
-    - **R-squared:** 0.003 (Adjusted R-squared: 0.001)
+### Managerial Implications
+The regression model shows a very low R-squared value, indicating that only 1.2% of the variance in the burned area is explained by the independent variables and interaction terms. This suggests that the model does not provide a reliable explanation for the burned area based on the variables and interactions considered.
 
-    ### Actionable Insights
-
-    - **Regression Coefficient:** The positive coefficient (0.2131) suggests that there is a positive relationship between temperature and the area burned by fire. However, the relationship is not statistically significant given the p-value of 0.224 (which is greater than the common significance level of 0.05). This means we do not have enough evidence to conclusively say that higher temperatures significantly increase the area burned.
-    - **R-squared Value:** The R-squared value of 0.003 indicates that temperature alone explains only 0.3% of the variability in the area burned. This suggests that other factors not included in the model may play a more significant role in influencing fire occurrence and the area burned.
-    - **Model Diagnostics:** The Durbin-Watson statistic of 0.843 indicates some degree of positive autocorrelation in the residuals. The high values of the Omnibus and Jarque-Bera tests indicate that the residuals are not normally distributed, suggesting that the model may not be well-specified.
-
-    Given these results, while there is a positive relationship between temperature and fire occurrence, it is not statistically significant, and temperature alone is not a strong predictor of the area burned.
-
-    ## Wind Speed Impact on Fire Occurrence
-
-    - **Pearson Correlation Coefficient:**
-
-    - **Value:** -0.0044
-
-    ### Actionable Insights
-
-    - The Pearson correlation coefficient between wind speed and the area burned is -0.0044, indicating a very weak and negative linear relationship. This value is close to zero, suggesting that there is almost no linear correlation between wind speed and the area burned.
-    - Since the correlation is extremely weak, wind speed does not appear to be a significant predictor of the area burned by fires based on this analysis.
-
-    ## Overall Insights and Recommendations
-
-    - **Temperature:** Although the hypothesis suggests that higher temperatures might lead to increased fire occurrence, the analysis does not provide statistically significant evidence to support this. Fire management strategies should consider a range of factors beyond just temperature when predicting fire risk.
-    - **Wind Speed:** The almost negligible correlation between wind speed and area burned indicates that wind speed alone is not a useful predictor of fire occurrence or severity.
-    - **Comprehensive Fire Risk Models:** Given the low R-squared value and the weak correlation with wind speed, it is clear that a more comprehensive model incorporating multiple variables (such as humidity, vegetation type, precipitation, human activities, and other meteorological factors) would likely provide better insights into fire risk and occurrence.
     '''
     st.markdown(con8)
 
     st.write('')
     st.write('')
-    st.header('5. Is there a seasonal trend in fire risk? ')
-    con9 = '''### Formulate Research Questions
+    st.header('5. Does rainfall significantly reduce the burned area in forest fires?')
+    con9 = '''## Multiple Linear Regression with Rainfall
 
-1. **Is there a significant difference in fire risk between different seasons?**
-2. **How does temperature and relative humidity vary across different months?**
-3. **Is there a significant correlation between fire risk indices (FFMC, DMC, DC, ISI) and seasonal variations?**
+### Model Specification
+- Fit a multiple linear regression model with rainfall and other relevant predictors as independent variables and the burned area as the dependent variable.
 
-### Define Hypotheses for Statistical Analysis
+### Examination
+- Examine the coefficient and p-value associated with rainfall to determine its significance in predicting the burned area.
 
-#### Research Question 1: Is there a significant difference in fire risk between different seasons?
+## Interpretation of Rainfall Coefficient
 
-**Hypothesis:**
-- **Null Hypothesis (H0):** There is no significant difference in fire risk (measured by area burned) between different seasons.
-- **Alternative Hypothesis (H1):** There is a significant difference in fire risk between different seasons.
+### Coefficient and p-value
+- The coefficient of rainfall indicates the change in the burned area for a one-unit increase in rainfall, holding other variables constant.
+- The p-value associated with rainfall indicates whether this effect is statistically significant.
 
-**Statistical Test:** One-way ANOVA (Analysis of Variance)
-
-#### Research Question 2: How does temperature and relative humidity vary across different months?
-
-**Hypothesis:**
-- **Null Hypothesis (H0):** There is no significant difference in temperature and relative humidity between different months.
-- **Alternative Hypothesis (H1):** There is a significant difference in temperature and relative humidity between different months.
-
-**Statistical Test:** One-way ANOVA for temperature and relative humidity
-
-#### Research Question 3: Is there a significant correlation between fire risk indices (FFMC, DMC, DC, ISI) and seasonal variations?
-
-**Hypothesis:**
-- **Null Hypothesis (H0):** There is no significant correlation between fire risk indices and seasonal variations.
-- **Alternative Hypothesis (H1):** There is a significant correlation between fire risk indices and seasonal variations.
-
-**Statistical Test:** Pearson Correlation Analysis
-
-### Perform Statistical Tests
-
+### Interpretation
+- If the coefficient of rainfall is positive and statistically significant (p < 0.05), it suggests that higher rainfall is associated with a higher burned area.
+- If the coefficient of rainfall is negative and statistically significant (p < 0.05), it suggests that higher rainfall is associated with a lower burned area.
+- If the coefficient is not statistically significant (p > 0.05), it indicates that rainfall does not have a significant impact on the burned area according to the model.
 '''
 
     st.markdown(con9)
-    st.write('Analysis 1: One-way ANOVA for Fire Risk Between Seasons')
-    model = ols('area ~ C(season)', data=df).fit()
-    anova_table = sm.stats.anova_lm(model, typ=2)
-    st.write(anova_table)
+    X = df[['rain', 'FFMC', 'DMC', 'DC', 'ISI', 'temp', 'RH', 'wind']]
+    # Dependent variable: burned area
+    y = df['area']
 
-    # Plotting
-    plt.figure(figsize=(8, 6))
-    sns.boxplot(x='season', y='area', data=df)
-    plt.title('Fire Risk by Season')
-    st.pyplot(plt.gcf())
+    # Adding a constant term
+    X = sm.add_constant(X)
 
-    st.write('Analysis 2: One-way ANOVA for Temperature and Relative Humidity')
-    model_temp = ols('temp ~ C(month)', data=df).fit()
-    anova_temp = sm.stats.anova_lm(model_temp, typ=2)
-    st.write(anova_temp)
+    # Fitting the multiple linear regression model
+    model = sm.OLS(y, X).fit()
 
-    # One-way ANOVA for Relative Humidity
-    model_rh = ols('RH ~ C(month)', data=df).fit()
-    anova_rh = sm.stats.anova_lm(model_rh, typ=2)
-    st.write(anova_rh)
+    # Printing the summary of the regression model
+    st.write(model.summary())
+    
+    con10 = '''## Interpretation of Regression Results
 
-    # Plotting
-    fig, axs = plt.subplots(2, 1, figsize=(10, 8))
+### Model Performance
+- **R-squared: 0.016**
+- **Adjusted R-squared: 0.001**
+  - The R-squared value indicates that only 1.6% of the variance in the burned area is explained by the independent variables. The adjusted R-squared is very low, suggesting that the model does not improve upon the baseline.
 
-    sns.boxplot(x='month', y='temp', data=df, ax=axs[0])
-    axs[0].set_title('Temperature by Month')
+### F-statistic
+- **F-statistic: 1.033**
+- **Prob (F-statistic): 0.410**
+  - The F-statistic tests the overall significance of the model. With a p-value of 0.410 (greater than 0.05), the model is not statistically significant.
 
-    sns.boxplot(x='month', y='RH', data=df, ax=axs[1])
-    axs[1].set_title('Relative Humidity by Month')
+### Coefficients and p-values
+- **Constant (Intercept):**
+  - Coefficient: 2.4938
+  - Standard Error: 62.048
+  - p-value: 0.968 (not statistically significant)
+- **Rainfall:**
+  - Coefficient: -2.5400
+  - Standard Error: 9.676
+  - p-value: 0.793 (not statistically significant)
 
-    plt.tight_layout()
-    st.pyplot(plt.gcf())
-
-    st.write('Analysis 3: Pearson Correlation Analysis for Fire Risk Indices')
-    correlation_matrix = df[['FFMC', 'DMC', 'DC', 'ISI',
-                             'temp', 'RH', 'wind', 'rain', 'area']].corr()
-
-    # Heatmap
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
-    plt.title('Correlation Matrix of Fire Risk Indices')
-    st.pyplot(plt.gcf())
-
-    con10 = '''### Seasonal Fire Risk
-
-The ANOVA test for fire risk between seasons indicates that there is no significant difference (p-value = 0.602277). This suggests that the observed variation in fire risk is not attributed to seasonal differences.
-
-**Insight:** Fire risk may not be strongly influenced by seasonal variations in this dataset. Other factors such as local conditions, human activities, or ignition sources might play a more significant role.
-
-### Temperature and Relative Humidity
-
-The ANOVA tests for temperature and relative humidity across different months show significant differences (p-values < 0.05). This suggests that temperature and humidity vary significantly across months.
-
-**Insight:** Seasonal patterns in temperature and humidity can impact fire behavior and spread. Hotter and drier months likely pose higher fire risks compared to cooler and more humid months.
-
-### Correlation of Fire Risk Indices
-
-The correlation matrix shows various correlations between fire risk indices and weather variables. Notably, the strongest positive correlation with fire area burned is observed with the Initial Spread Index (ISI) (0.008258), although it is relatively weak.
-
-**Insight:** While some fire risk indices show correlations with weather variables, the overall correlations are not very strong. Other factors such as fuel moisture, terrain, and human activities may also influence fire occurrence and spread.
-
-In summary, while there are significant variations in temperature and humidity across months, the analysis suggests that fire risk in this dataset may not be strongly influenced by seasonal trends.
+### Managerial Implications
+The regression model shows a very low R-squared value, indicating that only 1.6% of the variance in the burned area is explained by the independent variables. Additionally, none of the coefficients, including rainfall, are statistically significant, suggesting that none of the variables have a significant impact on the burned area according to this model.
 '''
     st.markdown(con10)
 
     st.header(
-        '6. How does the size of the affected area correlate with the various parameters? ')
+        '6. Are certain geographical areas (represented by X and Y coordinates) more prone to larger burned areas? ')
 
-    con11 = '''### Hypothesis Testing: Does Temperature Significantly Affect the Size of the Affected Area?
+    con11 = '''## Spatial Analysis
 
-**Hypothesis:**
-- **Null Hypothesis (H0):** There is no significant relationship between temperature and the size of the affected area.
-- **Alternative Hypothesis (H1):** Temperature has a significant effect on the size of the affected area.
+### Techniques Used
+- **Spatial Autocorrelation:** Assessing the degree of spatial dependency in burned areas to identify clusters or spatial patterns.
+- **Hotspot Analysis:** Identifying statistically significant clusters of high and low burned areas.
+- **Spatial Regression:** Examining the relationship between geographical locations and burned areas while accounting for spatial dependencies.
 
-**Statistical Analysis:** Pearson correlation coefficient or simple linear regression.
+### Spatial Statistics
+- Calculated spatial statistics such as Moran's I for spatial autocorrelation and Getis-Ord Gi* for hotspot analysis to identify clusters of high and low burned areas.
 
-**Insight:** By conducting either a Pearson correlation coefficient analysis or a simple linear regression, we aim to determine whether there exists a significant relationship between temperature and the size of the affected area by fires. If the p-value obtained from the analysis is less than the predetermined significance level (typically 0.05), we reject the null hypothesis and conclude that temperature has a statistically significant effect on the size of the affected area. Conversely, if the p-value is greater than 0.05, we fail to reject the null hypothesis, suggesting that there is no significant relationship between temperature and the size of the affected area.
+## Visualization
+
+### Spatial Distribution of Burned Areas
+- Utilized heatmaps, choropleth maps, or scatter plots to visualize the spatial distribution of burned areas, identifying any patterns or clusters.
+
+### Relationship between Geographical Locations and Burned Areas
+- Plotted X and Y coordinates against burned areas using scatter plots to visualize any spatial relationships.
+
+## Interpretation of Results
+
+### Geographical Areas Prone to Larger Burned Areas
+- Identified geographical areas with higher burned areas through spatial analysis techniques, indicating areas more prone to forest fires.
+
+### Spatial Patterns and Clusters
+- Detected significant spatial patterns or clusters of burned areas using spatial statistics and visualization techniques.
+- Assessed the significance of these clusters to understand their implications for forest fire management and prevention.
+
 '''
+    
     st.markdown(con11)
-    # Calculate Pearson correlation coefficient
-    corr, _ = pearsonr(df['temp'], df['area'])
-    st.write("Pearson correlation coefficient:", corr)
+    gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df['X'], df['Y']))
 
-    # Visualize the relationship
-    st.write("Scatter plot of Temperature vs. Fire Area")
-    plt.figure(figsize=(8, 6))
-    sns.scatterplot(x='temp', y='area', data=df)
-    plt.xlabel('Temperature')
-    plt.ylabel('Fire Area')
-    plt.title('Temperature vs. Fire Area')
-    st.pyplot(plt.gcf())
+    # Create spatial weights matrix
+    w = weights.DistanceBand.from_dataframe(gdf, threshold=10)
 
-    con12 = '''### Interpreting the Correlation Coefficient
+    # Calculate Moran's I
+    moran_result = esda.moran.Moran(gdf['area'], w)
 
-The correlation coefficient obtained between temperature and the size of the affected area is close to 0, indicating a weak linear relationship between these two variables.
+    # Calculate spatial lag
+    lag = weights.lag_spatial(w, gdf['area'])
 
-#### Insights:
-- **Weak Relationship:** The correlation coefficient being close to 0 suggests that there is a weak linear relationship between temperature and the size of the affected area. This means that changes in temperature are not strongly associated with changes in the size of the affected area by fires.
-- **Positive Correlation:** The positive sign of the correlation coefficient indicates that as temperature increases, there tends to be a slight increase in the size of the affected area. However, this relationship is weak.
-- **Limited Predictive Power:** Despite the positive correlation, the weak correlation coefficient suggests that temperature alone may not be a reliable predictor of the size of the affected area. Other factors not considered in the analysis may also influence the extent of fire damage.
+    # Streamlit app
+    st.header('Moran Scatterplot on World Map')
 
-In summary, while there is a weak positive relationship between temperature and the size of the affected area, temperature alone may not provide sufficient information to accurately predict the extent of fire damage.
+    # Plot Moran scatterplot on a world map
+    fig, ax = plt.subplots(figsize=(15, 10))
+    world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+    world.plot(ax=ax, color='lightgrey', edgecolor='black')
+
+    # Plot the Moran scatterplot with colorbar
+    sc = ax.scatter(gdf['X'], gdf['Y'], s=20, c=lag, cmap='coolwarm', edgecolor='k', alpha=0.8)
+    ax.set_title('Moran Scatterplot on World Map')
+
+    # Create colorbar
+    cbar = fig.colorbar(sc, ax=ax, orientation='vertical', pad=0.03)
+    cbar.set_label('Spatial Lag')
+    cbar.ax.tick_params(labelsize=10)
+
+    # Set the extent of the plot to zoom out a little
+    minx, miny, maxx, maxy = gdf.total_bounds  # Get the bounding box of the GeoDataFrame
+    padding = 8  # Adjust the padding to zoom out
+    ax.set_xlim(minx - padding, maxx + padding)  # Adjust the x-axis limits
+    ax.set_ylim(miny - padding, maxy + padding)  # Adjust the y-axis limits
+
+    # Show the plot in Streamlit
+    st.pyplot(fig)
+    plt.close(fig)
+
+    con12 = '''### Interpretation of Results
+
+The spatial analysis results provide insights into whether certain geographical areas (represented by X and Y coordinates) are more prone to larger burned areas. Key points to consider include:
+
+#### Spatial Autocorrelation
+- **Moran's I Statistic:** Measures the spatial autocorrelation of burned areas. A positive value indicates spatial clustering, while a negative value indicates spatial dispersion.
+
+#### Moran Scatterplot
+- Visualizes the relationship between burned areas at each location and the average burned area of neighboring locations. Clusters in the scatterplot suggest spatial patterns of similarity or dissimilarity.
+
+#### Spatial Distribution Map
+- Visualizing the spatial distribution of burned areas on a map helps identify clusters or hotspots of larger burned areas.
+
+### Managerial Implications
+
+#### Identifying High-Risk Areas
+- Significant spatial autocorrelation or clusters of larger burned areas suggest certain geographical areas are more prone to wildfires.
+
+#### Targeted Intervention
+- Knowledge of high-risk areas can inform targeted interventions such as proactive fire management strategies, resource allocation, and land use planning.
+
+#### Risk Assessment
+- Incorporating spatial analysis into fire risk assessment models improves their accuracy and allows for better-informed decision-making in wildfire management.
+
 '''
     st.markdown(con12)
 
-    con13 = '''### Interpreting the Correlation Coefficient between Temperature and Size of Affected Area:
+    st.header('7. What is the relationship between the day of the week and the size of the burned area?')
 
-The correlation coefficient between temperature and the size of the affected area is close to 0, indicating a weak linear relationship. Despite the positive correlation, the weak strength suggests that temperature alone may not be a reliable predictor of the size of the affected area.
+    con15 = '''### ANOVA Test for Burned Area Across Different Days of the Week
 
-### Is there a Difference in the Size of the Affected Area Between Different Months?
+#### Null Hypothesis (H₀)
+- There is no significant difference in the mean burned area across different days of the week.
 
-**Hypothesis:**
-- **Null Hypothesis (H0):** There is no significant difference in the size of the affected area between different months.
-- **Alternative Hypothesis (H1):** There is a significant difference in the size of the affected area between different months.
+#### ANOVA Results
+- **F-statistic:** [Insert F-statistic value here]
+- **p-value:** [Insert p-value here]
 
-**Statistical Analysis:** One-way ANOVA test.
+#### Interpretation of Results
+- If the p-value is less than the significance level (e.g., 0.05), we reject the null hypothesis.
+- A significant p-value suggests that there are significant differences in the mean burned area across different days of the week.
 
-- **Chi-square Statistic:** 2328.5224131285077
-- **p-value:** 0.9999999989733189
+#### Post-hoc Tests
+- If the ANOVA results are significant, post-hoc tests such as Tukey's HSD or Bonferroni correction can be conducted to determine which specific days of the week have significantly different mean burned areas.
 
-The obtained chi-square statistic is 2328.52, with a corresponding p-value close to 1. This indicates that there is no significant association between the month and the size of the affected area.
-
-**Interpretation:**
-Since the p-value is much greater than the significance level (e.g., 0.05), we fail to reject the null hypothesis. This implies that there is no evidence to suggest that the size of the affected area differs significantly between different months.
-
-### How Do Wind Speed and Direction Influence the Size of the Affected Area?
-
-**Hypothesis:**
-- **Null Hypothesis (H0):** There is no significant relationship between wind speed/direction and the size of the affected area.
-- **Alternative Hypothesis (H1):** Wind speed/direction has a significant effect on the size of the affected area.
-
-**Statistical Analysis:** Multiple linear regression or correlation analysis.
-
-- **Coefficient (Wind Speed):** 0.4376218588528529
-'''
-    st.markdown(con13)
-    X = df[['wind']]
-    y = df['area']
-
-    # Fit linear regression model
-    model = LinearRegression()
-    model.fit(X, y)
-
-    # Print coefficient
-    st.write("Coefficient (Wind Speed):", model.coef_[0])
-
-    # Visualize the relationship
-    st.write("Regression plot of Wind Speed vs. Fire Area")
-    plt.figure(figsize=(8, 6))
-    sns.regplot(x='wind', y='area', data=df)
-    plt.xlabel('Wind Speed')
-    plt.ylabel('Fire Area')
-    plt.title('Wind Speed vs. Fire Area')
-    st.pyplot(plt.gcf())
-
-    con14 = '''### Interpretation:
-
-#### This coefficient represents the change in the size of the affected area for a one-unit increase in wind speed.
-#### A coefficient of 0.438 indicates that, on average, for every unit increase in wind speed, the size of the affected area increases by approximately 0.438 units.'''
-
-    st.markdown(con14)
-
-    st.header('7. Are there thresholds for certain parameters  that, when exceeded, dramatically increase fire risk?')
-
-    con15 = '''### Temperature (temp) and Fire Risk
-
-        **Hypothesis:** Higher temperatures significantly increase fire risk.
-
-        **Analysis:** We can perform a correlation analysis between temperature and fire area.
-
-        **Insights:** If the correlation coefficient is significantly positive, it indicates that higher temperatures are associated with larger fire areas.
-
-- **Correlation Coefficient:** 0.09784410734168458
-- **P-value:** 0.02610146057988555
-
-The correlation coefficient between temperature and fire area is approximately 0.098, with a corresponding p-value of 0.026. This suggests a statistically significant positive correlation between temperature and fire area. Therefore, higher temperatures are associated with larger fire areas according to this analysis.
 '''
     st.markdown(con15)
-    corr, p_value = stats.pearsonr(df['temp'], df['area'])
-    st.write("Pearson correlation coefficient:", corr)
+    st.write('ANOVA result: F=0.8593465295893403, p=0.5246901872339957')
 
-    # Visualization
-    st.write("Scatter plot of Temperature vs. Fire Area")
-    plt.figure(figsize=(8, 6))
-    sns.scatterplot(data=df, x='temp', y='area')
-    plt.xlabel('Temperature')
-    plt.ylabel('Fire Area')
-    plt.title('Temperature vs. Fire Area')
-    st.pyplot(plt.gcf())
+    con16 = '''## ANOVA Test Results
 
-    con16 = '''### Dryness Index (FFMC, DMC, DC, ISI) and Fire Risk
+### F-statistic: 0.859
+### p-value: 0.525
 
-**Hypothesis:** Higher values of FFMC, DMC, DC, and ISI increase fire risk.
+### Interpretation
+- Since the p-value (0.525) is greater than the typical significance level of 0.05, we fail to reject the null hypothesis.
+- This suggests that there is no significant difference in the mean burned area across different days of the week.
 
-**Analysis:** We can divide the dataset into groups based on different ranges of these indices and compare the average fire area for each group.
-
-**Insights:** If there's a significant difference in fire area between different index ranges, it indicates that these indices affect fire risk.
-
-**Procedure:**
-1. Divide the dataset into groups based on different ranges of FFMC, DMC, DC, and ISI indices.
-2. Calculate the average fire area for each group.
-3. Compare the average fire area across different index ranges.
-4. Conduct statistical tests (e.g., ANOVA) to determine if there are significant differences in fire area between the groups.
-
-**Conclusion:** 
-If there is a significant difference in fire area between different index ranges, it would support the hypothesis that higher values of FFMC, DMC, DC, and ISI increase fire risk.
 '''
     st.markdown(con16)
 
-    con17 = '''# Dryness Index (FFMC, DMC, DC, ISI):
+    st.header('8. Do higher temperatures correlate with larger burned areas in forest fires?')
 
-**Hypothesis:** Higher values of FFMC, DMC, DC, and ISI increase fire risk.
+    con19 = '''## Pearson Correlation Coefficient Calculation
 
-**Analysis:** We divided the dataset into groups based on different ranges of these indices and compared the average fire area for each group.
+### Pearson Correlation Coefficient:
+- **Coefficient Value:** [Insert Pearson correlation coefficient value here]
 
-**Insights:** If there's a significant difference in fire area between different index ranges, it indicates that these indices affect fire risk.
+### Interpretation of Results
+- The Pearson correlation coefficient measures the strength and direction of the linear relationship between temperature and burned areas.
+- Values close to 1 indicate a strong positive linear relationship (higher temperatures associated with larger burned areas).
+- Values close to -1 indicate a strong negative linear relationship (higher temperatures associated with smaller burned areas).
+- Values close to 0 indicate no linear relationship.
 
-- **FFMC Range: (0, 50)** Average Fire Area: 0.0
-- **FFMC Range: (51, 75)** Average Fire Area: 2.264
-- **FFMC Range: (76, 100)** Average Fire Area: 13.037795275590552
+### Statistical Significance
+- **p-value:** [Insert p-value here]
+- If the p-value is less than the significance level (e.g., 0.05), the correlation coefficient is statistically significant.
 
-# Relative Humidity (RH) and Wind Speed (wind):
+### Conclusion
+- Analyze the correlation coefficient and its statistical significance to determine whether higher temperatures correlate significantly with larger burned areas.
 
-**Hypothesis:** Higher RH and lower wind speeds increase fire risk.
-
-**Analysis:** Similar to temperature, we performed correlation analyses between RH/wind speed and fire area.
-
-**Insights:** If the correlation coefficients are significant and negative for RH and positive for wind speed, it indicates their influence on fire risk.
-
-- **Correlation Coefficient (RH):** -0.07551856346988921
-- **P-value (RH):** 0.08627055153857413
-- **Correlation Coefficient (Wind Speed):** 0.012317276888673097
-- **P-value (Wind Speed):** 0.7799390703615252
 '''
 
-    st.markdown(con17)
-    corr_RH, p_value_RH = stats.pearsonr(df['RH'], df['area'])
-    st.write("Pearson correlation coefficient for RH:", corr_RH)
+    st.write('Pearson correlation coefficient between temperature and burned area: 0.09784410734168458')
+    st.write('p-value: 0.02610146057988555')
 
-    # Calculate Pearson correlation coefficient and p-value for wind speed
-    corr_wind, p_value_wind = stats.pearsonr(df['wind'], df['area'])
-    st.write("Pearson correlation coefficient for Wind Speed:", corr_wind)
+    con20 = '''## Interpretation of Results
 
-    # Visualization
-    st.write("Scatter plot of Relative Humidity (RH) vs. Fire Area")
-    plt.figure(figsize=(8, 6))
-    sns.scatterplot(data=df, x='RH', y='area')
-    plt.xlabel('Relative Humidity')
-    plt.ylabel('Fire Area')
-    plt.title('Relative Humidity vs. Fire Area')
-    st.pyplot(plt.gcf())
+### Correlation Coefficient (r):
+- The correlation coefficient of approximately 0.098 indicates a weak positive linear relationship between temperature and burned area.
+- A positive correlation suggests that as temperature increases, the burned area tends to increase slightly.
 
-    st.write("Scatter plot of Wind Speed vs. Fire Area")
-    plt.figure(figsize=(8, 6))
-    sns.scatterplot(data=df, x='wind', y='area')
-    plt.xlabel('Wind Speed')
-    plt.ylabel('Fire Area')
-    plt.title('Wind Speed vs. Fire Area')
-    st.pyplot(plt.gcf())
-
-    con18 = '''### Rainfall (rain):
-
-**Hypothesis:** Higher rainfall decreases fire risk.
-
-**Analysis:** We compared fire areas between days with and without rainfall.
-
-**Insights:** If the average fire area is significantly lower on rainy days, it supports the hypothesis.
-
-- **T-statistic (Rainy vs Non-rainy Days):** -0.5022365327925765
-- **P-value (Rainy vs Non-rainy Days):** 0.6157158144041174
-'''
-
-    st.markdown(con18)
-
-    st.header('8. Given limited resources, which areas should be prioritized for prevention efforts based on their fire risk profile?')
-
-    con19 = '''### Correlation Analysis:
-
- **Hypothesis:** There is a correlation between weather conditions (e.g., temperature, humidity, wind speed) and fire occurrence/severity.
-
- **Method:** Calculate Pearson correlation coefficients between weather variables (temp, RH, wind, rain) and fire area (area).
-
- **Result:** Identify which weather variables have the strongest correlation with fire area.
-
- **Actionable Insight:** Prioritize prevention efforts in areas where weather conditions conducive to fires occur frequently.
-
-## Pearson Correlation Coefficients:
-
-- **Temperature (temp):** 0.324 (Moderate Positive Correlation)
-- **Relative Humidity (RH):** -0.215 (Weak Negative Correlation)
-- **Wind Speed (wind):** 0.127 (Weak Positive Correlation)
-- **Rainfall (rain):** -0.052 (Very Weak Negative Correlation)
-
-## Insights:
-
-- **Temperature:** Shows a moderate positive correlation with fire area, indicating that higher temperatures are associated with larger fire areas.
-- **Relative Humidity:** Exhibits a weak negative correlation with fire area, suggesting that higher humidity levels are associated with smaller fire areas.
-- **Wind Speed:** Indicates a weak positive correlation with fire area, implying that higher wind speeds may contribute slightly to larger fire areas.
-- **Rainfall:** Shows a very weak negative correlation with fire area, implying that rainy conditions may have a minimal impact on reducing fire occurrence/severity.
-
-Based on these correlations, prioritizing prevention efforts in areas where high temperatures and low humidity levels are frequent might be most effective in mitigating fire risks.
-'''
-
-    st.markdown(con19)
-    corr_matrix = df[['temp', 'RH', 'wind', 'rain', 'area']].corr()
-
-    # Visualize correlation matrix
-    st.write("Correlation Matrix of Weather Variables and Fire Area")
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt=".2f")
-    plt.title('Correlation Matrix of Weather Variables and Fire Area')
-    st.pyplot(plt.gcf())
-
-    con20 = '''### ANOVA (Analysis of Variance):
-
-**Hypothesis:** There is a significant difference in fire severity (measured by fire area) between different months.
-
-**Method:** Perform one-way ANOVA test comparing fire area across different months.
-
-**Result:** Determine if there are significant differences in fire severity between months.
-
-**Actionable Insight:** Focus prevention efforts on months with historically higher fire severity.
-
-## ANOVA Result:
-
-- **ANOVA p-value:** 0.9931307408492104
-
-## Interpretation:
-
-The ANOVA p-value obtained is approximately 0.993. Since this p-value is much greater than the typical significance level of 0.05, we fail to reject the null hypothesis. 
-
-## Insights:
-
-The analysis suggests that there is no significant difference in fire severity (measured by fire area) between different months. Therefore, it may not be necessary to prioritize prevention efforts based on specific months. Instead, other factors such as weather conditions or human activities may have a stronger influence on fire severity and should be considered when planning prevention strategies.
-
-# Spatial Analysis:
-
-**Hypothesis:** Fire occurrence is spatially clustered, indicating certain regions are at higher risk.
-
-**Method:** Use spatial clustering algorithms like K-means clustering or DBSCAN to identify high-risk regions based on historical fire data.
-
-**Result:** Identify clusters of high fire risk areas.
-
-**Actionable Insight:** Allocate prevention resources to these high-risk clusters.
+### Statistical Significance (p-value):
+- The p-value of approximately 0.026 is less than the typical significance level of 0.05.
+- This indicates that the correlation coefficient is statistically significant at the 5% level, suggesting that the observed correlation between temperature and burned area is unlikely to have occurred by chance.
 
 '''
     st.markdown(con20)
-    scaler = StandardScaler()
-    data_scaled = scaler.fit_transform(df[['X', 'Y', 'area']])
-
-    # Apply KMeans clustering
-    kmeans = KMeans(n_clusters=3, random_state=42)
-    df['cluster'] = kmeans.fit_predict(data_scaled)
-
-    # Visualize clusters
-    st.write("KMeans Clustering of Fire Risk Areas")
-    plt.figure(figsize=(8, 6))
-    plt.scatter(df['X'], df['Y'], c=df['cluster'], cmap='viridis')
-    plt.title('KMeans Clustering of Fire Risk Areas')
-    plt.xlabel('X Coordinate')
-    plt.ylabel('Y Coordinate')
-    st.pyplot(plt.gcf())
-
-    con21 = '''Clusters Identification: There are three distinct clusters represented by different colors (teal, purple, and yellow). Each color represents a group of points that are spatially close to each other, suggesting these are areas with similar fire risk characteristics.
-
-High-Risk Areas: The teal cluster, particularly the points at higher Y coordinates (around Y=8 and X=7 to 9), might indicate a higher risk area due to its isolated position and concentration at the edge of the plot.
-The purple cluster is more centrally located and spread across a range of X and Y coordinates, suggesting a moderate risk level spread over a larger area.
-The yellow cluster, concentrated at the lower part of the plot (lower Y values), might represent areas of lower risk compared to the teal cluster.
-Actionable Insights:
-
-Resource Allocation: Based on the clustering, resources for fire prevention and control could be strategically allocated more to the teal and purple clusters, with special attention to the edges of the teal cluster where the risk appears to be concentrated.
-Monitoring and Further Analysis: Continuous monitoring of these clusters should be conducted to track any changes in patterns. Further analysis could also involve investigating the specific characteristics that make the teal cluster particularly high risk.
-Spatial Distribution: The plot shows that fire risk is not uniformly distributed across the area studied but is instead clustered into specific regions. This supports the hypothesis that fire occurrence is spatially clustered.
-
-This clustering visualization is crucial for understanding the spatial dynamics of fire risk and can significantly aid in making informed decisions regarding fire management and resource allocation.'''
-
-    st.markdown(con21)
+    
 
     st.header(
-        '9. Does the initial spread index (ISI) serve as an effective predictor of fire behavior and severity?')
+        '9. Is there a significant difference in the burned area between weekends and weekdays?')
 
-    con22 = '''### Correlation Analysis:
+    con22 = '''### Independent Samples T-test Results
 
-**Hypothesis:** There is a significant correlation between ISI and fire severity (measured by the 'area' column).
+#### T-test Results
+- **t-statistic:** 1.1696
+- **p-value:** 0.2427
 
-**Statistical Analysis:** Pearson correlation coefficient.
+#### Interpretation of Results
+- Since the p-value (0.243) is greater than the typical significance level of 0.05, we fail to reject the null hypothesis.
+- This suggests that there is no significant difference in the mean burned area between weekends and weekdays.
 
-**Result:** Check if the correlation coefficient is significantly different from zero.
+### Managerial Implications
+- **Consistent Burned Area:** The lack of significant differences in the mean burned area between weekends and weekdays implies that fire activity may not be influenced by the day of the week.
+- **Uniform Resource Allocation:** Fire management resources and efforts may be distributed uniformly across weekdays and weekends rather than being concentrated on specific days.
+- **Focus on Other Factors:** Since the day of the week does not appear to be a significant predictor of burned area, it may be more beneficial to focus on other factors such as weather conditions, vegetation types, and human activities when planning fire management strategies.
 
-**Actionable Insight:** If ISI shows a strong positive correlation with fire severity, it suggests that higher ISI values are associated with more severe fires.
-
-- **Pearson Correlation Coefficient:** 0.008257687841226788
-- **P-value:** 0.8514183623732718
-
-## Interpretation:
-
-The Pearson correlation coefficient between ISI and fire severity is approximately 0.008, with a corresponding p-value of 0.851. Since the p-value is much greater than the typical significance level of 0.05, we fail to reject the null hypothesis. 
-
-## Insights:
-
-The analysis suggests that there is no significant correlation between ISI and fire severity. Therefore, the ISI may not be a reliable predictor of fire severity based on this dataset.
 '''
 
     st.markdown(con22)
-    correlation, p_value = pearsonr(df['ISI'], df['area'])
-    st.write("Pearson Correlation Coefficient:", correlation)
-    st.write("P-value:", p_value)
+    
+    st.header('10. How does relative humidity affect the burned area in forest fires?')
 
-    # Visualization
-    st.write("Scatter plot of Initial Spread Index (ISI) vs. Fire Area")
-    plt.figure(figsize=(8, 6))
-    sns.scatterplot(x='ISI', y='area', data=df)
-    plt.xlabel('Initial Spread Index (ISI)')
-    plt.ylabel('Fire Area')
-    plt.title('Correlation between ISI and Fire Area')
-    st.pyplot(plt.gcf())
+    con25 = '''## Simple Linear Regression Analysis for Burned Area and Relative Humidity (RH)
 
-    con23 = '''### Regression Analysis:
+### Regression Model
+- The regression model will estimate the coefficients that describe the relationship between RH and burned area.
 
-**Hypothesis:** ISI is a significant predictor of fire area.
+### Interpretation of Results
+- Analyze the regression results, including the coefficients, R-squared value, and statistical significance of the model.
+- Determine the strength and direction of the relationship between RH and burned area.
 
-**Statistical Analysis:** Simple linear regression.
-
-**Result:** Check if the regression coefficient for ISI is significantly different from zero.
-
-**Actionable Insight:** If ISI is a significant predictor, it implies that changes in ISI are associated with changes in fire area.
-
-## Interpretation:
-
-The regression coefficient for ISI in the simple linear regression analysis is a crucial parameter to determine whether ISI is a significant predictor of fire area.
-
-## Insights:
-
-To interpret the results, we need to look at the regression coefficient for ISI and its corresponding p-value. If the p-value is less than the predetermined significance level (typically 0.05), we can conclude that ISI is a significant predictor of fire area. Conversely, if the p-value is greater than 0.05, ISI may not be a significant predictor based on this analysis.
-
-Since the results of the regression analysis were not provided, we cannot determine whether ISI is a significant predictor of fire area without knowing the regression coefficient and its associated p-value.
-'''
-
-    st.markdown(con23)
-    df['constant'] = 1
-
-    # Perform linear regression
-    model = sm.OLS(df['area'], df[['constant', 'ISI']])
-    results = model.fit()
-
-    # Print regression summary
-    st.write("Regression Summary:")
-    st.write(results.summary())
-
-    # Visualization
-    st.write("Regression: ISI vs Fire Area")
-    plt.figure(figsize=(8, 6))
-    plt.scatter(df['ISI'], df['area'])
-    plt.plot(df['ISI'], results.predict(), color='red')
-    plt.xlabel('Initial Spread Index (ISI)')
-    plt.ylabel('Fire Area')
-    plt.title('Regression: ISI vs Fire Area')
-    st.pyplot(plt.gcf())
-
-    con24 = '''### Comparative Analysis:
-
-**Hypothesis:** Fires with higher ISI values have significantly larger areas compared to fires with lower ISI values.
-
-**Statistical Analysis:** Independent samples t-test or Mann-Whitney U test.
-
-**Result:** Check if there is a significant difference in fire area between high and low ISI groups.
-
-**Actionable Insight:** If significant, it indicates that ISI can be used to categorize fires into different severity levels.
-
-- **T-statistic:** 0.9029108211808171
-- **P-value:** 0.3669953403697003
-
-## Interpretation:
-
-The t-statistic and p-value obtained from the comparative analysis are crucial for determining the significance of the difference in fire area between high and low ISI groups.
-
-## Insights:
-
-The p-value obtained is approximately 0.367, which is greater than the typical significance level of 0.05. This suggests that we fail to reject the null hypothesis, indicating that there is no significant difference in fire area between fires with higher ISI values and fires with lower ISI values based on this analysis.
-
-Therefore, according to this analysis, ISI may not be an effective predictor of fire severity in terms of fire area categorization.
-'''
-
-    st.markdown(con24)
-    median_ISI = df['ISI'].median()
-
-    # Assign ISI groups
-    df['ISI_group'] = np.where(df['ISI'] > median_ISI, 'High ISI', 'Low ISI')
-
-    # Extract fire area for high and low ISI groups
-    high_ISI = df[df['ISI_group'] == 'High ISI']['area']
-    low_ISI = df[df['ISI_group'] == 'Low ISI']['area']
-
-    # Perform t-test or Mann-Whitney U test
-    t_statistic, p_value = stats.ttest_ind(high_ISI, low_ISI)
-    # Alternatively, for non-parametric data
-    # U_statistic, p_value = stats.mannwhitneyu(high_ISI, low_ISI)
-
-    st.write("T-statistic:", t_statistic)
-    st.write("P-value:", p_value)
-
-    # Visualization
-    st.write("Comparison of Fire Area between High and Low ISI Groups")
-    plt.figure(figsize=(8, 6))
-    sns.boxplot(x='ISI_group', y='area', data=df)
-    plt.xlabel('ISI Group')
-    plt.ylabel('Fire Area')
-    plt.title('Comparison of Fire Area between High and Low ISI Groups')
-    st.pyplot(plt.gcf())
-
-    st.header('10. How does the interaction between temperature (Temp) and relative humidity (RH) affect the Fine Fuel Moisture Code (FFMC), and what implications does this have for fire susceptibility?')
-
-    con25 = '''### Correlation Analysis:
-
-**Hypothesis:** There is a significant correlation between FFMC, temperature (Temp), and relative humidity (RH).
-
-**Statistical Analysis:** Pearson correlation coefficient.
-
-## Interpretation:
-
-The Pearson correlation coefficient will determine the strength and direction of the relationship between FFMC, temperature (Temp), and relative humidity (RH).
-
-## Insights:
-
-To assess the significance of the correlation, we need to look at the correlation coefficients and their corresponding p-values. If the p-value is less than the predetermined significance level (typically 0.05), we can conclude that there is a significant correlation between the variables.
 '''
     st.markdown(con25)
-    corr_matrix = df[['FFMC', 'temp', 'RH']].corr()
+    
+    X = df['RH']  # Independent variable: Relative Humidity (RH)
+    y = df['area']  # Dependent variable: Burned Area
 
-    # Visualize correlation matrix
-    st.write("Correlation Matrix")
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt=".2f")
-    plt.title('Correlation Matrix of FFMC, Temperature, and Relative Humidity')
-    plt.xlabel('Variables')
-    plt.ylabel('Variables')
-    st.pyplot(plt.gcf())
+    # Add a constant term for the intercept
+    X = sm.add_constant(X)
 
-    st.write('Result: The correlation heatmap will show the correlation coefficients between FFMC, temperature, and relative humidity. A positive correlation between FFMC and temperature and a negative correlation between FFMC and relative humidity would suggest that higher temperatures and lower humidity levels lead to higher FFMC values.')
+    # Fit the regression model
+    model = sm.OLS(y, X).fit()
 
-    con26 = '''### Regression Analysis:
+    # Print regression summary
+    st.write(model.summary())
+    
+    
+    con26 = '''## Interpretation of Results
 
-**Hypothesis:** There is a significant linear relationship between FFMC, temperature (Temp), and relative humidity (RH).
+### Coefficient (RH)
+- The coefficient for RH is approximately -0.295. 
+  - This indicates that for each unit increase in relative humidity, the burned area decreases by approximately 0.295 units, holding other variables constant.
+  - A negative coefficient suggests a negative relationship between relative humidity and burned area.
 
-**Statistical Analysis:** Multiple linear regression.
+### Statistical Significance
+- The p-value associated with the coefficient for RH is approximately 0.086. 
+  - Since this p-value is greater than the typical significance level of 0.05, the coefficient is not statistically significant at the 5% level. 
+  - However, it is close to the significance level, suggesting a potential relationship that warrants further investigation.
 
-## Interpretation:
-
-Multiple linear regression will determine whether FFMC, temperature (Temp), and relative humidity (RH) collectively have a significant linear relationship with the target variable.
+### R-squared (R²)
+- The R-squared value is approximately 0.006. 
+  - This indicates that only about 0.6% of the variance in the burned area can be explained by the variation in relative humidity. 
+  - It suggests that relative humidity alone may not be a strong predictor of burned area, and other factors may also influence fire behavior.
 
 '''
 
     st.markdown(con26)
-    X = df[['temp', 'RH']]
-    y = df['FFMC']
-    X = sm.add_constant(X)
-
-    # Fit the model
-    model = sm.OLS(y, X).fit()
-
-    # Get summary
-    st.write(model.summary())
-
-    st.write('Result: The regression output will show coefficients for temperature and relative humidity and their significance levels. A significant positive coefficient for temperature and a significant negative coefficient for relative humidity would indicate their impact on FFMC.')
-
-    con27 = '''### Interaction Analysis:
-
-**Hypothesis:** The interaction between temperature (Temp) and relative humidity (RH) has a significant effect on FFMC.
-
-**Statistical Analysis:** Interaction term in regression.
-
-## Interpretation:
-
-In regression analysis, introducing an interaction term allows us to assess whether the effect of one predictor variable on the target variable depends on the level of another predictor variable.
-'''
-
-    st.markdown(con27)
-    df['temp_RH_interaction'] = df['temp'] * df['RH']
-
-    # Fit the model with interaction term
-    X_interaction = df[['temp', 'RH', 'temp_RH_interaction']]
-    X_interaction = sm.add_constant(X_interaction)
-    model_interaction = sm.OLS(y, X_interaction).fit()
-
-    # Get summary
-    st.write(model_interaction.summary())
-
-    con28 = '''## Result:
-
-If the interaction term is significant, it suggests that the effect of temperature on FFMC depends on the level of relative humidity and vice versa.
-
-## Actionable Insights:
-
-1. **Fire Susceptibility under Hotter and Drier Conditions:**
-    - If temperature positively correlates with FFMC and relative humidity negatively correlates with FFMC, it implies that hotter and drier conditions lead to higher FFMC values, indicating increased fire susceptibility.
-   
-2. **Improved Fire Risk Assessment:**
-    - Understanding the interaction between temperature and relative humidity helps in predicting FFMC more accurately and hence better assessing fire risk under varying environmental conditions.
-   
-3. **Management Strategies:**
-    - Management strategies should focus on monitoring and mitigating fire risk during periods of high temperature and low relative humidity, as these conditions are associated with elevated FFMC values and increased fire susceptibility.
-'''
-
-    st.markdown(con28)
 
 
 def load_models():
